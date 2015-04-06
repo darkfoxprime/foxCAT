@@ -10,10 +10,3 @@ Current version:  1.0.0-alpha1
 ## Features
 * The entire set of tools is written in _(hopefully well-documented)_ python
 * Common file format and common directives used for both `flg` and `fpg`
-
-## To Do
-* [ ] Improve error handling in flg
-  * [ ] get rid of assertions, replace with lexer exceptions that can be caught
-  * [ ] figure out best way to deal with a tokenizing error, if the caller asks for another token again
-* [ ] Add error handling to fpg
-* [ ] Add libraries for common tasks such as symbol table processing, quoted string processing, etc.
