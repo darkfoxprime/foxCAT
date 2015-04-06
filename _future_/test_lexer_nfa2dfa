@@ -1,0 +1,336 @@
+#!/usr/bin/python
+
+import sys
+import codecs
+import re
+
+class bitbucket(object):
+  def __init__(self):
+    self.closed = False
+  def close(self):
+    self.closed = True
+  def flush(self):
+    if self.closed:
+      raise ValueError("I/O operation on closed file")
+  def next(self):
+    if self.closed:
+      raise ValueError("I/O operation on closed file")
+    raise StopIteration()
+  def __iter__(self):
+    if self.closed:
+      raise ValueError("I/O operation on closed file")
+    return self
+  def read(self,size=None):
+    if self.closed:
+      raise ValueError("I/O operation on closed file")
+    return ''
+  def readline(self,size=None):
+    if self.closed:
+      raise ValueError("I/O operation on closed file")
+    return ''
+  def readlines(self,size=None):
+    if self.closed:
+      raise ValueError("I/O operation on closed file")
+    return []
+  def write(self,str):
+    if self.closed:
+      raise ValueError("I/O operation on closed file")
+  def writelines(self,seq):
+    if self.closed:
+      raise ValueError("I/O operation on closed file")
+
+DEBUG = bitbucket()
+DEBUG = sys.stderr
+
+# NFA states are a list of transitions.  each transition includes either a range of accepted characters or None (for epsilon transitions) and either the list of potential target states for that transition or the accept state for that transition.  Only epsilon (None) transitions will have more than 1 target state in the NFA, and only epsilon transitions will have an accept state.  If an epsilon transition occurs, it will be the only transition in the state.
+
+def parse_nfa(string):
+  NFA = []
+  NFAstate_re = re.compile(r'n0*(?P<state>[0-9][0-9]*)', re.IGNORECASE)
+  # NFAtrans_re uses \050 and \051 to match the left/right parens to avoid messing up the paren-matching in vi
+  NFAtrans_re = re.compile(r'<(?:(?P<rangelow>[0-9a-f]+)-(?P<rangehigh>[0-9a-f]+))?>(?:n0*(?P<target>[1-9][0-9]*)|\050([^\051]+)\051)', re.IGNORECASE)
+  for parts in [line.split(' ') for line in [lines for lines in string.split('\n') if len(lines)]]:
+    snum = int(NFAstate_re.match(parts.pop(0)).group(1))
+    while snum >= len(NFA):
+      NFA.append([])
+    state = {}
+    for trans in parts:
+      trans = NFAtrans_re.match(trans).groups()
+      # [0],[1] are either None or start/end of the match ranges
+      # [2] is either a target state or None
+      # [3] is either an accept token or None
+      if trans[0] is None:
+        symrange = None
+      else:
+        symrange = tuple([int(x,16) for x in trans[0:2]])
+      if trans[2] is None:
+        # this is an accept state: just set it
+        state[symrange] = trans[3]
+      else:
+        # this is a transition: create the list if needed and add this target state to it
+        if symrange not in state:
+          state[symrange] = []
+        state[symrange].append(int(trans[2]))
+    NFA[snum] = tuple([(syms,(((type(value)==list)and tuple(value))or value)) for (syms,value) in state.items()])
+  return NFA
+
+NFA=parse_nfa("""n00 <>n07 <>n15 <>n33 <>n43 <>n47 <>n53 <>n59
+n01 <41-5A>n02 <5F-5F>n02 <61-7A>n02
+n02 <>n05
+n03 <30-39>n04 <41-5A>n04 <5F-5F>n04 <61-7A>n04
+n04 <>n06
+n05 <>n03 <>n06
+n06 <>n05 <>n08
+n07 <>n01
+n08 <>(TOKEN)
+n09 <25-25>n10
+n10 <>n13
+n11 <61-7A>n12
+n12 <>n14
+n13 <>n11
+n14 <>n13 <>n16
+n15 <>n09
+n16 <>(DIRECTIVE)
+n17 <22-22>n18
+n18 <>n29
+n19 <5C-5C>n20
+n20 <>n21
+n21 <00-09>n22 <0B-FF>n22
+n22 <>n26
+n23 <00-21>n24 <23-5B>n24 <5D-FF>n24
+n24 <>n26
+n25 <>n19 <>n23
+n26 <>n28
+n27 <>n25
+n28 <>n30
+n29 <>n27 <>n30
+n30 <>n29 <>n31
+n31 <22-22>n32
+n32 <>n34
+n33 <>n17
+n34 <>(QUOTEDSTR)
+n35 <2B-2B>n36 <2D-2D>n36
+n36 <>n38
+n37 <>n35 <>n38
+n38 <>n41
+n39 <30-39>n40
+n40 <>n42
+n41 <>n39
+n42 <>n41 <>n44
+n43 <>n37
+n44 <>(NUMBER)
+n45 <3D-3D>n46
+n46 <>n48
+n47 <>n45
+n48 <>(EQUALS)
+n49 <2D-2D>n50
+n50 <>n51
+n51 <3E-3E>n52
+n52 <>n54
+n53 <>n49
+n54 <>(NEWMODE)
+n55 <09-0A>n56 <20-20>n56
+n56 <>n58
+n57 <>n55
+n58 <>n57 <>n60
+n59 <>n57
+n60 <>(_skip_)
+""")
+
+# return the closure of a set of states.
+#
+# the closure for a set of states is a list of states that includes the
+# original set of states, and every state that can be reached from one of
+# those states by only epsilon transitions.
+
+def __nfa2dfa_closure(states):
+  states = list(states)
+  newstates = []
+  while len(states) > 0:
+    s = states.pop()
+    newstates.append(s)
+    if NFA[s][0][0] is None and isinstance(NFA[s][0][1], tuple):
+      for t in NFA[s][0][1]:
+        if t not in states and t not in newstates:
+          states.append(t)
+  return tuple(sorted(newstates))
+
+# return the token that is accepted by a closure.
+# each closure will have at most one accept state - a state with a single epsilon transition to a string rather than a list of target states.
+
+def __nfa2dfa_accepts(states_closure):
+  accepts = None
+  for s in states_closure:
+    if NFA[s][0][0] is None:
+      if isinstance(NFA[s][0][1],str):
+        assert accepts == None
+        accepts = NFA[s][0][1]
+  return accepts
+
+# return the minimal list of distinct symbol ranges and target states
+# that cover all symbol ranges found in the closure.
+# each distinct symbol range will be paired with the closure of the list
+# of target states reachable by that symbol range.
+# this covers the "goto" function in the original nfa->dfa algorithm.
+
+def __nfa2dfa_ranges(states_closure):
+  # ranges will be a list of (symfirst, symlast, [targets])
+  # ranges will be kept in sorted order such that each symfirst is
+  # greater than the symlast of the previous range, and each symlast is
+  # less than the symfirst of the next range.
+  print >> DEBUG, "Generating range list for closure %s" % (repr(states_closure),)
+  ranges = []
+  for s in states_closure:
+    for ((symfirst,symlast),(target,)) in [(syms,targets) for (syms,targets) in NFA[s] if syms is not None]:
+      print >> DEBUG, "... Adding (%d-%d)=%d to range list" % (symfirst, symlast, target)
+      # some hackery so that we increment at the start of the loop:
+      i = -1
+      while symfirst is not None and (i+1) < len(ranges):
+        i += 1
+
+        # if symlast is less than symfirst of ranges[i],
+        # then this is where we insert this new range
+        if symlast < ranges[i][0]:
+          print >> DEBUG, "*** inserting (%d-%d)=%d at %d" % (symfirst, symlast, target, i)
+          ranges.insert(i, (symfirst, symlast, [target]))
+          # set symfirst to None to mark that we're done
+          symfirst = None
+
+        # if symfirst is <= symfirst of ranges[i], then we need to split
+        # the first part of our range off and insert it
+        elif symfirst < ranges[i][0]:
+          print >> DEBUG, "*** inserting partial range (%d-%d)=%d at %d" % (symfirst, ranges[i][0]-1, target, i)
+          ranges.insert(i, (symfirst, ranges[i][0]-1, [target]))
+          symfirst = ranges[i+1][0]
+
+        # if symfirst is <= symlast of ranges[i], then we overlap this range.
+        elif symfirst <= ranges[i][1]:
+          # handle the overlap in four phases:
+          # first, split ranges[i] before symfirst, if symfirst is
+          # greater than symfirst of ranges[i].  if we do this,
+          # immediately increment i.
+          # make sure to use a _copy_ of the list of targets in the split
+          # range, not just the list reference.
+          if symfirst > ranges[i][0]:
+            print >> DEBUG, "*** splitting %s at %d" % (repr(ranges[i]), symfirst)
+            ranges.insert(i+1, (symfirst, ranges[i][1], ranges[i][2][:]))
+            ranges[i] = (ranges[i][0], symfirst-1, ranges[i][2])
+            i += 1
+          # second, split ranges[i] after symlast, if symlast is less
+          # than symlast of ranges[i].
+          # make sure to use a _copy_ of the list of targets in the split
+          # range, not just the list reference.
+          if symlast < ranges[i][1]:
+            print >> DEBUG, "*** splitting %s at %d" % (repr(ranges[i]), symlast+1)
+            ranges.insert(i+1, (symlast+1, ranges[i][1], ranges[i][2][:]))
+            ranges[i] = (symfirst, symlast, ranges[i][2])
+          # third, add our target to the current range target
+          print >> DEBUG, "*** adding target %d for (%d-%d) to %s" % (target, symfirst, symlast, repr(ranges[i]))
+          ranges[i][2].append(target)
+          # finally, either split our symrange, if symlast is greater than
+          # symlast of ranges[i], or mark our symrange as None.
+          if symlast > ranges[i][1]:
+            symfirst = ranges[i][0] + 1
+            print >> DEBUG, "... Continuing with new range (%d-%d)" % (symfirst, symlast,)
+          else:
+            symfirst = None
+      # if symfirst is still not None, then we need to add our range to
+      # end of the range list.
+      if symfirst is not None:
+        print >> DEBUG, "*** Adding (%d,%d)=%d to end of range list" % (symfirst, symlast, target)
+        ranges.append( (symfirst, symlast, [target]) )
+      print >> DEBUG, "... Range list is now %s" % (repr(ranges),)
+  # finally, process each range to create a closure of the target states
+  # and return the list as a tuple
+  ranges = tuple( [ (symfirst, symlast, __nfa2dfa_closure(targets)) for (symfirst, symlast, targets) in ranges ] )
+  print >> DEBUG, "<<< returning range list %s" % (repr(ranges),)
+  return ranges
+
+
+closures_to_process = set()
+closures = {}
+dfa = []
+
+def __nfa2dfa_state_for(states_closure):
+  if states_closure not in closures:
+    closures[states_closure] = len(dfa)
+    dfa.append([])
+  return closures[states_closure]
+
+def __nfa2dfa_process(states):
+  states = __nfa2dfa_closure(states)
+  state = __nfa2dfa_state_for(states)
+  dfa[state].extend([__nfa2dfa_accepts(states),[]])
+  print >> DEBUG, "Processing closure %s (state %s) accepting %s" % (repr(states), repr(state), repr(dfa[state][0]))
+  for (symfirst, symlast, targets) in __nfa2dfa_ranges(states):
+    next_state = __nfa2dfa_state_for(targets)
+    print >> DEBUG, "Symbols %d-%d go to targets %s (state %s)" % (symfirst, symlast, repr(targets), repr(next_state))
+    dfa[state][1].append( (symfirst,symlast,next_state) )
+    if len(dfa[next_state]) == 0:
+      closures_to_process.add(targets)
+
+closures_to_process.add( (0,) )
+while len(closures_to_process) > 0:
+  __nfa2dfa_process(closures_to_process.pop())
+
+print >> DEBUG, "before compaction:"
+import pprint
+pprint.pprint(dfa, stream=DEBUG)
+
+# locate duplicate states
+duplicate_states = []
+for s in range(len(dfa)):
+  # convert state (and included transition list) to tuple
+  dfa[s][1] = tuple(dfa[s][1])
+  dfa[s] = tuple(dfa[s])
+  # if this state is a duplicate of a previous state, record that into the duplicate_states map.
+  try:
+    duplicate_states.append(dfa[0:s].index(dfa[s]))
+  except ValueError:
+    duplicate_states.append(None)
+print >> DEBUG, "duplicate_states = " + repr(duplicate_states)
+
+new_states = []
+# identify new state numbers for each state
+delta = 0
+for s in range(len(dfa)):
+  if duplicate_states[s] is not None:
+    new_states.append(new_states[duplicate_states[s]])
+    delta += 1
+  else:
+    new_states.append(s - delta)
+print >> DEBUG, "new_states = " + repr(new_states)
+
+# replace targets with correct state numbers
+# and remove the duplicate states
+s = len(dfa)
+while s > 0:
+  s -= 1
+  if duplicate_states[s] is None:
+    print >> DEBUG, "... Transforming new state %d" % (s,)
+    dfa[s] = (dfa[s][0], tuple([ (symfirst, symlast, new_states[target]) for (symfirst, symlast, target) in dfa[s][1] ]))
+  else:
+    print >> DEBUG, "... Deleting duplicate state %d" % (s,)
+    del dfa[s]
+
+import pprint
+pprint.pprint(dfa)
+print ""
+
+out = sys.stdout
+
+out.write('  dfa=[')
+for d in dfa:
+  out.write('(')
+  out.write(repr(d[0]))
+  out.write(',(')
+  for (sf,sl,t) in d[1]:
+    out.write('(')
+    out.write(repr(sf))
+    out.write(',')
+    out.write(repr(sl))
+    out.write(',')
+    out.write(repr(t))
+    out.write('),')
+  out.write(')),')
+out.write(']\n')

@@ -1,0 +1,1058 @@
+
+State 0:
+  [0] %start -> . file
+  [1] file -> . file line
+  [2] file -> . line
+  [3] line -> . directive
+  [4] line -> . lexer_rule
+  [5] directive -> . DIRECTIVE expression
+  [17] lexer_rule -> . TOKEN regexp
+  [18] lexer_rule -> . TOKEN regexp ACTION TOKEN
+  [19] lexer_rule -> . DIRECTIVE regexp
+  [20] lexer_rule -> . DIRECTIVE regexp ACTION TOKEN
+
+  DIRECTIVE shift 4
+  TOKEN shift 88
+  file goto 1
+  line goto 93
+  directive goto 3
+  lexer_rule goto 92
+
+State 1:
+  [0] %start -> file .
+  [1] file -> file . line
+  [3] line -> . directive
+  [4] line -> . lexer_rule
+  [5] directive -> . DIRECTIVE expression
+  [17] lexer_rule -> . TOKEN regexp
+  [18] lexer_rule -> . TOKEN regexp ACTION TOKEN
+  [19] lexer_rule -> . DIRECTIVE regexp
+  [20] lexer_rule -> . DIRECTIVE regexp ACTION TOKEN
+
+  %eof accept
+  DIRECTIVE shift 4
+  TOKEN shift 88
+  line goto 2
+  directive goto 3
+  lexer_rule goto 92
+
+State 2:
+  [1] file -> file line .
+
+  %eof reduce [1] file -> file line
+  DIRECTIVE reduce [1] file -> file line
+  TOKEN reduce [1] file -> file line
+
+State 3:
+  [3] line -> directive .
+
+  %eof reduce [3] line -> directive
+  DIRECTIVE reduce [3] line -> directive
+  TOKEN reduce [3] line -> directive
+
+State 4:
+  [5] directive -> DIRECTIVE . expression
+  [19] lexer_rule -> DIRECTIVE . regexp
+  [20] lexer_rule -> DIRECTIVE . regexp ACTION TOKEN
+  [8] expression -> . value
+  [21] regexp -> . RX_START regexp_alt RX_END
+  [22] regexp -> . RX_START regexp_alt RX_END regexp_options
+  [9] value -> . TOKEN
+  [10] value -> . TOKEN EQUALS expression
+  [11] value -> . QUOTEDSTR
+  [12] value -> . NUMBER
+  [13] value -> . POSITIONAL_PARAMETER
+  [14] value -> . LIST_OPEN expression_list LIST_CLOSE
+  [15] value -> . TOKEN LIST_OPEN LIST_CLOSE
+  [16] value -> . TOKEN LIST_OPEN expression_list LIST_CLOSE
+
+  LIST_OPEN shift 10
+  NUMBER shift 30
+  POSITIONAL_PARAMETER shift 31
+  QUOTEDSTR shift 32
+  RX_START shift 40
+  TOKEN shift 33
+  expression goto 5
+  value goto 6
+  regexp goto 7
+
+State 5:
+  [5] directive -> DIRECTIVE expression .
+
+  %eof reduce [5] directive -> DIRECTIVE expression
+  DIRECTIVE reduce [5] directive -> DIRECTIVE expression
+  TOKEN reduce [5] directive -> DIRECTIVE expression
+
+State 6:
+  [8] expression -> value .
+
+  %eof reduce [8] expression -> value
+  DIRECTIVE reduce [8] expression -> value
+  TOKEN reduce [8] expression -> value
+
+State 7:
+  [19] lexer_rule -> DIRECTIVE regexp .
+  [20] lexer_rule -> DIRECTIVE regexp . ACTION TOKEN
+
+  %eof reduce [19] lexer_rule -> DIRECTIVE regexp
+  ACTION shift 8
+  DIRECTIVE reduce [19] lexer_rule -> DIRECTIVE regexp
+  TOKEN reduce [19] lexer_rule -> DIRECTIVE regexp
+
+State 8:
+  [20] lexer_rule -> DIRECTIVE regexp ACTION . TOKEN
+
+  TOKEN shift 9
+
+State 9:
+  [20] lexer_rule -> DIRECTIVE regexp ACTION TOKEN .
+
+  %eof reduce [20] lexer_rule -> DIRECTIVE regexp ACTION TOKEN
+  DIRECTIVE reduce [20] lexer_rule -> DIRECTIVE regexp ACTION TOKEN
+  TOKEN reduce [20] lexer_rule -> DIRECTIVE regexp ACTION TOKEN
+
+State 10:
+  [14] value -> LIST_OPEN . expression_list LIST_CLOSE
+  [6] expression_list -> . expression_list COMMA expression
+  [7] expression_list -> . expression
+  [8] expression -> . value
+  [9] value -> . TOKEN
+  [10] value -> . TOKEN EQUALS expression
+  [11] value -> . QUOTEDSTR
+  [12] value -> . NUMBER
+  [13] value -> . POSITIONAL_PARAMETER
+  [14] value -> . LIST_OPEN expression_list LIST_CLOSE
+  [15] value -> . TOKEN LIST_OPEN LIST_CLOSE
+  [16] value -> . TOKEN LIST_OPEN expression_list LIST_CLOSE
+
+  LIST_OPEN shift 15
+  NUMBER shift 19
+  POSITIONAL_PARAMETER shift 20
+  QUOTEDSTR shift 21
+  TOKEN shift 22
+  expression_list goto 11
+  expression goto 18
+  value goto 14
+
+State 11:
+  [14] value -> LIST_OPEN expression_list . LIST_CLOSE
+  [6] expression_list -> expression_list . COMMA expression
+
+  COMMA shift 12
+  LIST_CLOSE shift 29
+
+State 12:
+  [6] expression_list -> expression_list COMMA . expression
+  [8] expression -> . value
+  [9] value -> . TOKEN
+  [10] value -> . TOKEN EQUALS expression
+  [11] value -> . QUOTEDSTR
+  [12] value -> . NUMBER
+  [13] value -> . POSITIONAL_PARAMETER
+  [14] value -> . LIST_OPEN expression_list LIST_CLOSE
+  [15] value -> . TOKEN LIST_OPEN LIST_CLOSE
+  [16] value -> . TOKEN LIST_OPEN expression_list LIST_CLOSE
+
+  LIST_OPEN shift 15
+  NUMBER shift 19
+  POSITIONAL_PARAMETER shift 20
+  QUOTEDSTR shift 21
+  TOKEN shift 22
+  expression goto 13
+  value goto 14
+
+State 13:
+  [6] expression_list -> expression_list COMMA expression .
+
+  COMMA reduce [6] expression_list -> expression_list COMMA expression
+  LIST_CLOSE reduce [6] expression_list -> expression_list COMMA expression
+
+State 14:
+  [8] expression -> value .
+
+  COMMA reduce [8] expression -> value
+  LIST_CLOSE reduce [8] expression -> value
+
+State 15:
+  [14] value -> LIST_OPEN . expression_list LIST_CLOSE
+  [6] expression_list -> . expression_list COMMA expression
+  [7] expression_list -> . expression
+  [8] expression -> . value
+  [9] value -> . TOKEN
+  [10] value -> . TOKEN EQUALS expression
+  [11] value -> . QUOTEDSTR
+  [12] value -> . NUMBER
+  [13] value -> . POSITIONAL_PARAMETER
+  [14] value -> . LIST_OPEN expression_list LIST_CLOSE
+  [15] value -> . TOKEN LIST_OPEN LIST_CLOSE
+  [16] value -> . TOKEN LIST_OPEN expression_list LIST_CLOSE
+
+  LIST_OPEN shift 15
+  NUMBER shift 19
+  POSITIONAL_PARAMETER shift 20
+  QUOTEDSTR shift 21
+  TOKEN shift 22
+  expression_list goto 16
+  expression goto 18
+  value goto 14
+
+State 16:
+  [14] value -> LIST_OPEN expression_list . LIST_CLOSE
+  [6] expression_list -> expression_list . COMMA expression
+
+  COMMA shift 12
+  LIST_CLOSE shift 17
+
+State 17:
+  [14] value -> LIST_OPEN expression_list LIST_CLOSE .
+
+  COMMA reduce [14] value -> LIST_OPEN expression_list LIST_CLOSE
+  LIST_CLOSE reduce [14] value -> LIST_OPEN expression_list LIST_CLOSE
+
+State 18:
+  [7] expression_list -> expression .
+
+  COMMA reduce [7] expression_list -> expression
+  LIST_CLOSE reduce [7] expression_list -> expression
+
+State 19:
+  [12] value -> NUMBER .
+
+  COMMA reduce [12] value -> NUMBER
+  LIST_CLOSE reduce [12] value -> NUMBER
+
+State 20:
+  [13] value -> POSITIONAL_PARAMETER .
+
+  COMMA reduce [13] value -> POSITIONAL_PARAMETER
+  LIST_CLOSE reduce [13] value -> POSITIONAL_PARAMETER
+
+State 21:
+  [11] value -> QUOTEDSTR .
+
+  COMMA reduce [11] value -> QUOTEDSTR
+  LIST_CLOSE reduce [11] value -> QUOTEDSTR
+
+State 22:
+  [9] value -> TOKEN .
+  [10] value -> TOKEN . EQUALS expression
+  [15] value -> TOKEN . LIST_OPEN LIST_CLOSE
+  [16] value -> TOKEN . LIST_OPEN expression_list LIST_CLOSE
+
+  COMMA reduce [9] value -> TOKEN
+  EQUALS shift 27
+  LIST_CLOSE reduce [9] value -> TOKEN
+  LIST_OPEN shift 23
+
+State 23:
+  [15] value -> TOKEN LIST_OPEN . LIST_CLOSE
+  [16] value -> TOKEN LIST_OPEN . expression_list LIST_CLOSE
+  [6] expression_list -> . expression_list COMMA expression
+  [7] expression_list -> . expression
+  [8] expression -> . value
+  [9] value -> . TOKEN
+  [10] value -> . TOKEN EQUALS expression
+  [11] value -> . QUOTEDSTR
+  [12] value -> . NUMBER
+  [13] value -> . POSITIONAL_PARAMETER
+  [14] value -> . LIST_OPEN expression_list LIST_CLOSE
+  [15] value -> . TOKEN LIST_OPEN LIST_CLOSE
+  [16] value -> . TOKEN LIST_OPEN expression_list LIST_CLOSE
+
+  LIST_CLOSE shift 26
+  LIST_OPEN shift 15
+  NUMBER shift 19
+  POSITIONAL_PARAMETER shift 20
+  QUOTEDSTR shift 21
+  TOKEN shift 22
+  expression_list goto 24
+  expression goto 18
+  value goto 14
+
+State 24:
+  [16] value -> TOKEN LIST_OPEN expression_list . LIST_CLOSE
+  [6] expression_list -> expression_list . COMMA expression
+
+  COMMA shift 12
+  LIST_CLOSE shift 25
+
+State 25:
+  [16] value -> TOKEN LIST_OPEN expression_list LIST_CLOSE .
+
+  COMMA reduce [16] value -> TOKEN LIST_OPEN expression_list LIST_CLOSE
+  LIST_CLOSE reduce [16] value -> TOKEN LIST_OPEN expression_list LIST_CLOSE
+
+State 26:
+  [15] value -> TOKEN LIST_OPEN LIST_CLOSE .
+
+  COMMA reduce [15] value -> TOKEN LIST_OPEN LIST_CLOSE
+  LIST_CLOSE reduce [15] value -> TOKEN LIST_OPEN LIST_CLOSE
+
+State 27:
+  [10] value -> TOKEN EQUALS . expression
+  [8] expression -> . value
+  [9] value -> . TOKEN
+  [10] value -> . TOKEN EQUALS expression
+  [11] value -> . QUOTEDSTR
+  [12] value -> . NUMBER
+  [13] value -> . POSITIONAL_PARAMETER
+  [14] value -> . LIST_OPEN expression_list LIST_CLOSE
+  [15] value -> . TOKEN LIST_OPEN LIST_CLOSE
+  [16] value -> . TOKEN LIST_OPEN expression_list LIST_CLOSE
+
+  LIST_OPEN shift 15
+  NUMBER shift 19
+  POSITIONAL_PARAMETER shift 20
+  QUOTEDSTR shift 21
+  TOKEN shift 22
+  expression goto 28
+  value goto 14
+
+State 28:
+  [10] value -> TOKEN EQUALS expression .
+
+  COMMA reduce [10] value -> TOKEN EQUALS expression
+  LIST_CLOSE reduce [10] value -> TOKEN EQUALS expression
+
+State 29:
+  [14] value -> LIST_OPEN expression_list LIST_CLOSE .
+
+  %eof reduce [14] value -> LIST_OPEN expression_list LIST_CLOSE
+  DIRECTIVE reduce [14] value -> LIST_OPEN expression_list LIST_CLOSE
+  TOKEN reduce [14] value -> LIST_OPEN expression_list LIST_CLOSE
+
+State 30:
+  [12] value -> NUMBER .
+
+  %eof reduce [12] value -> NUMBER
+  DIRECTIVE reduce [12] value -> NUMBER
+  TOKEN reduce [12] value -> NUMBER
+
+State 31:
+  [13] value -> POSITIONAL_PARAMETER .
+
+  %eof reduce [13] value -> POSITIONAL_PARAMETER
+  DIRECTIVE reduce [13] value -> POSITIONAL_PARAMETER
+  TOKEN reduce [13] value -> POSITIONAL_PARAMETER
+
+State 32:
+  [11] value -> QUOTEDSTR .
+
+  %eof reduce [11] value -> QUOTEDSTR
+  DIRECTIVE reduce [11] value -> QUOTEDSTR
+  TOKEN reduce [11] value -> QUOTEDSTR
+
+State 33:
+  [9] value -> TOKEN .
+  [10] value -> TOKEN . EQUALS expression
+  [15] value -> TOKEN . LIST_OPEN LIST_CLOSE
+  [16] value -> TOKEN . LIST_OPEN expression_list LIST_CLOSE
+
+  %eof reduce [9] value -> TOKEN
+  DIRECTIVE reduce [9] value -> TOKEN
+  EQUALS shift 38
+  LIST_OPEN shift 34
+  TOKEN reduce [9] value -> TOKEN
+
+State 34:
+  [15] value -> TOKEN LIST_OPEN . LIST_CLOSE
+  [16] value -> TOKEN LIST_OPEN . expression_list LIST_CLOSE
+  [6] expression_list -> . expression_list COMMA expression
+  [7] expression_list -> . expression
+  [8] expression -> . value
+  [9] value -> . TOKEN
+  [10] value -> . TOKEN EQUALS expression
+  [11] value -> . QUOTEDSTR
+  [12] value -> . NUMBER
+  [13] value -> . POSITIONAL_PARAMETER
+  [14] value -> . LIST_OPEN expression_list LIST_CLOSE
+  [15] value -> . TOKEN LIST_OPEN LIST_CLOSE
+  [16] value -> . TOKEN LIST_OPEN expression_list LIST_CLOSE
+
+  LIST_CLOSE shift 37
+  LIST_OPEN shift 15
+  NUMBER shift 19
+  POSITIONAL_PARAMETER shift 20
+  QUOTEDSTR shift 21
+  TOKEN shift 22
+  expression_list goto 35
+  expression goto 18
+  value goto 14
+
+State 35:
+  [16] value -> TOKEN LIST_OPEN expression_list . LIST_CLOSE
+  [6] expression_list -> expression_list . COMMA expression
+
+  COMMA shift 12
+  LIST_CLOSE shift 36
+
+State 36:
+  [16] value -> TOKEN LIST_OPEN expression_list LIST_CLOSE .
+
+  %eof reduce [16] value -> TOKEN LIST_OPEN expression_list LIST_CLOSE
+  DIRECTIVE reduce [16] value -> TOKEN LIST_OPEN expression_list LIST_CLOSE
+  TOKEN reduce [16] value -> TOKEN LIST_OPEN expression_list LIST_CLOSE
+
+State 37:
+  [15] value -> TOKEN LIST_OPEN LIST_CLOSE .
+
+  %eof reduce [15] value -> TOKEN LIST_OPEN LIST_CLOSE
+  DIRECTIVE reduce [15] value -> TOKEN LIST_OPEN LIST_CLOSE
+  TOKEN reduce [15] value -> TOKEN LIST_OPEN LIST_CLOSE
+
+State 38:
+  [10] value -> TOKEN EQUALS . expression
+  [8] expression -> . value
+  [9] value -> . TOKEN
+  [10] value -> . TOKEN EQUALS expression
+  [11] value -> . QUOTEDSTR
+  [12] value -> . NUMBER
+  [13] value -> . POSITIONAL_PARAMETER
+  [14] value -> . LIST_OPEN expression_list LIST_CLOSE
+  [15] value -> . TOKEN LIST_OPEN LIST_CLOSE
+  [16] value -> . TOKEN LIST_OPEN expression_list LIST_CLOSE
+
+  LIST_OPEN shift 10
+  NUMBER shift 30
+  POSITIONAL_PARAMETER shift 31
+  QUOTEDSTR shift 32
+  TOKEN shift 33
+  expression goto 39
+  value goto 6
+
+State 39:
+  [10] value -> TOKEN EQUALS expression .
+
+  %eof reduce [10] value -> TOKEN EQUALS expression
+  DIRECTIVE reduce [10] value -> TOKEN EQUALS expression
+  TOKEN reduce [10] value -> TOKEN EQUALS expression
+
+State 40:
+  [21] regexp -> RX_START . regexp_alt RX_END
+  [22] regexp -> RX_START . regexp_alt RX_END regexp_options
+  [23] regexp_alt -> . regexp_alts RX_ALTERNATE regexp_concat
+  [24] regexp_alt -> . regexp_concat
+  [25] regexp_alts -> . regexp_alts RX_ALTERNATE regexp_concat
+  [26] regexp_alts -> . regexp_concat
+  [27] regexp_concat -> . regexp_concat regexp_multi
+  [28] regexp_concat -> . regexp_multi
+  [29] regexp_multi -> . regexp_atom
+  [30] regexp_multi -> . regexp_atom RX_STAR
+  [31] regexp_multi -> . regexp_atom RX_QUESTION
+  [32] regexp_multi -> . regexp_atom RX_PLUS
+  [33] regexp_atom -> . RX_ATOM
+  [34] regexp_atom -> . regexp_charclass
+  [35] regexp_atom -> . RX_GRP_OPEN regexp_alt RX_GRP_END
+  [36] regexp_charclass -> . RX_CHARCLASS regexp_cc_parts CC_END
+
+  RX_ATOM shift 56
+  RX_CHARCLASS shift 57
+  RX_GRP_OPEN shift 65
+  regexp_alt goto 41
+  regexp_alts goto 47
+  regexp_concat goto 87
+  regexp_multi goto 86
+  regexp_atom goto 51
+  regexp_charclass goto 55
+
+State 41:
+  [21] regexp -> RX_START regexp_alt . RX_END
+  [22] regexp -> RX_START regexp_alt . RX_END regexp_options
+
+  RX_END shift 42
+
+State 42:
+  [21] regexp -> RX_START regexp_alt RX_END .
+  [22] regexp -> RX_START regexp_alt RX_END . regexp_options
+  [41] regexp_options -> . regexp_options regexp_option
+  [42] regexp_options -> . regexp_option
+  [43] regexp_option -> . RX_OPTION
+
+  %eof reduce [21] regexp -> RX_START regexp_alt RX_END
+  ACTION reduce [21] regexp -> RX_START regexp_alt RX_END
+  DIRECTIVE reduce [21] regexp -> RX_START regexp_alt RX_END
+  RX_OPTION shift 45
+  TOKEN reduce [21] regexp -> RX_START regexp_alt RX_END
+  regexp_options goto 43
+  regexp_option goto 46
+
+State 43:
+  [22] regexp -> RX_START regexp_alt RX_END regexp_options .
+  [41] regexp_options -> regexp_options . regexp_option
+  [43] regexp_option -> . RX_OPTION
+
+  %eof reduce [22] regexp -> RX_START regexp_alt RX_END regexp_options
+  ACTION reduce [22] regexp -> RX_START regexp_alt RX_END regexp_options
+  DIRECTIVE reduce [22] regexp -> RX_START regexp_alt RX_END regexp_options
+  RX_OPTION shift 45
+  TOKEN reduce [22] regexp -> RX_START regexp_alt RX_END regexp_options
+  regexp_option goto 44
+
+State 44:
+  [41] regexp_options -> regexp_options regexp_option .
+
+  %eof reduce [41] regexp_options -> regexp_options regexp_option
+  ACTION reduce [41] regexp_options -> regexp_options regexp_option
+  DIRECTIVE reduce [41] regexp_options -> regexp_options regexp_option
+  RX_OPTION reduce [41] regexp_options -> regexp_options regexp_option
+  TOKEN reduce [41] regexp_options -> regexp_options regexp_option
+
+State 45:
+  [43] regexp_option -> RX_OPTION .
+
+  %eof reduce [43] regexp_option -> RX_OPTION
+  ACTION reduce [43] regexp_option -> RX_OPTION
+  DIRECTIVE reduce [43] regexp_option -> RX_OPTION
+  RX_OPTION reduce [43] regexp_option -> RX_OPTION
+  TOKEN reduce [43] regexp_option -> RX_OPTION
+
+State 46:
+  [42] regexp_options -> regexp_option .
+
+  %eof reduce [42] regexp_options -> regexp_option
+  ACTION reduce [42] regexp_options -> regexp_option
+  DIRECTIVE reduce [42] regexp_options -> regexp_option
+  RX_OPTION reduce [42] regexp_options -> regexp_option
+  TOKEN reduce [42] regexp_options -> regexp_option
+
+State 47:
+  [23] regexp_alt -> regexp_alts . RX_ALTERNATE regexp_concat
+  [25] regexp_alts -> regexp_alts . RX_ALTERNATE regexp_concat
+
+  RX_ALTERNATE shift 48
+
+State 48:
+  [23] regexp_alt -> regexp_alts RX_ALTERNATE . regexp_concat
+  [25] regexp_alts -> regexp_alts RX_ALTERNATE . regexp_concat
+  [27] regexp_concat -> . regexp_concat regexp_multi
+  [28] regexp_concat -> . regexp_multi
+  [29] regexp_multi -> . regexp_atom
+  [30] regexp_multi -> . regexp_atom RX_STAR
+  [31] regexp_multi -> . regexp_atom RX_QUESTION
+  [32] regexp_multi -> . regexp_atom RX_PLUS
+  [33] regexp_atom -> . RX_ATOM
+  [34] regexp_atom -> . regexp_charclass
+  [35] regexp_atom -> . RX_GRP_OPEN regexp_alt RX_GRP_END
+  [36] regexp_charclass -> . RX_CHARCLASS regexp_cc_parts CC_END
+
+  RX_ATOM shift 56
+  RX_CHARCLASS shift 57
+  RX_GRP_OPEN shift 65
+  regexp_concat goto 49
+  regexp_multi goto 86
+  regexp_atom goto 51
+  regexp_charclass goto 55
+
+State 49:
+  [23] regexp_alt -> regexp_alts RX_ALTERNATE regexp_concat .
+  [25] regexp_alts -> regexp_alts RX_ALTERNATE regexp_concat .
+  [27] regexp_concat -> regexp_concat . regexp_multi
+  [29] regexp_multi -> . regexp_atom
+  [30] regexp_multi -> . regexp_atom RX_STAR
+  [31] regexp_multi -> . regexp_atom RX_QUESTION
+  [32] regexp_multi -> . regexp_atom RX_PLUS
+  [33] regexp_atom -> . RX_ATOM
+  [34] regexp_atom -> . regexp_charclass
+  [35] regexp_atom -> . RX_GRP_OPEN regexp_alt RX_GRP_END
+  [36] regexp_charclass -> . RX_CHARCLASS regexp_cc_parts CC_END
+
+  RX_ALTERNATE reduce [25] regexp_alts -> regexp_alts RX_ALTERNATE regexp_concat
+  RX_ATOM shift 56
+  RX_CHARCLASS shift 57
+  RX_END reduce [23] regexp_alt -> regexp_alts RX_ALTERNATE regexp_concat
+  RX_GRP_OPEN shift 65
+  regexp_multi goto 50
+  regexp_atom goto 51
+  regexp_charclass goto 55
+
+State 50:
+  [27] regexp_concat -> regexp_concat regexp_multi .
+
+  RX_ALTERNATE reduce [27] regexp_concat -> regexp_concat regexp_multi
+  RX_ATOM reduce [27] regexp_concat -> regexp_concat regexp_multi
+  RX_CHARCLASS reduce [27] regexp_concat -> regexp_concat regexp_multi
+  RX_END reduce [27] regexp_concat -> regexp_concat regexp_multi
+  RX_GRP_OPEN reduce [27] regexp_concat -> regexp_concat regexp_multi
+
+State 51:
+  [29] regexp_multi -> regexp_atom .
+  [30] regexp_multi -> regexp_atom . RX_STAR
+  [31] regexp_multi -> regexp_atom . RX_QUESTION
+  [32] regexp_multi -> regexp_atom . RX_PLUS
+
+  RX_ALTERNATE reduce [29] regexp_multi -> regexp_atom
+  RX_ATOM reduce [29] regexp_multi -> regexp_atom
+  RX_CHARCLASS reduce [29] regexp_multi -> regexp_atom
+  RX_END reduce [29] regexp_multi -> regexp_atom
+  RX_GRP_OPEN reduce [29] regexp_multi -> regexp_atom
+  RX_PLUS shift 52
+  RX_QUESTION shift 53
+  RX_STAR shift 54
+
+State 52:
+  [32] regexp_multi -> regexp_atom RX_PLUS .
+
+  RX_ALTERNATE reduce [32] regexp_multi -> regexp_atom RX_PLUS
+  RX_ATOM reduce [32] regexp_multi -> regexp_atom RX_PLUS
+  RX_CHARCLASS reduce [32] regexp_multi -> regexp_atom RX_PLUS
+  RX_END reduce [32] regexp_multi -> regexp_atom RX_PLUS
+  RX_GRP_OPEN reduce [32] regexp_multi -> regexp_atom RX_PLUS
+
+State 53:
+  [31] regexp_multi -> regexp_atom RX_QUESTION .
+
+  RX_ALTERNATE reduce [31] regexp_multi -> regexp_atom RX_QUESTION
+  RX_ATOM reduce [31] regexp_multi -> regexp_atom RX_QUESTION
+  RX_CHARCLASS reduce [31] regexp_multi -> regexp_atom RX_QUESTION
+  RX_END reduce [31] regexp_multi -> regexp_atom RX_QUESTION
+  RX_GRP_OPEN reduce [31] regexp_multi -> regexp_atom RX_QUESTION
+
+State 54:
+  [30] regexp_multi -> regexp_atom RX_STAR .
+
+  RX_ALTERNATE reduce [30] regexp_multi -> regexp_atom RX_STAR
+  RX_ATOM reduce [30] regexp_multi -> regexp_atom RX_STAR
+  RX_CHARCLASS reduce [30] regexp_multi -> regexp_atom RX_STAR
+  RX_END reduce [30] regexp_multi -> regexp_atom RX_STAR
+  RX_GRP_OPEN reduce [30] regexp_multi -> regexp_atom RX_STAR
+
+State 55:
+  [34] regexp_atom -> regexp_charclass .
+
+  RX_ALTERNATE reduce [34] regexp_atom -> regexp_charclass
+  RX_ATOM reduce [34] regexp_atom -> regexp_charclass
+  RX_CHARCLASS reduce [34] regexp_atom -> regexp_charclass
+  RX_END reduce [34] regexp_atom -> regexp_charclass
+  RX_GRP_OPEN reduce [34] regexp_atom -> regexp_charclass
+  RX_PLUS reduce [34] regexp_atom -> regexp_charclass
+  RX_QUESTION reduce [34] regexp_atom -> regexp_charclass
+  RX_STAR reduce [34] regexp_atom -> regexp_charclass
+
+State 56:
+  [33] regexp_atom -> RX_ATOM .
+
+  RX_ALTERNATE reduce [33] regexp_atom -> RX_ATOM
+  RX_ATOM reduce [33] regexp_atom -> RX_ATOM
+  RX_CHARCLASS reduce [33] regexp_atom -> RX_ATOM
+  RX_END reduce [33] regexp_atom -> RX_ATOM
+  RX_GRP_OPEN reduce [33] regexp_atom -> RX_ATOM
+  RX_PLUS reduce [33] regexp_atom -> RX_ATOM
+  RX_QUESTION reduce [33] regexp_atom -> RX_ATOM
+  RX_STAR reduce [33] regexp_atom -> RX_ATOM
+
+State 57:
+  [36] regexp_charclass -> RX_CHARCLASS . regexp_cc_parts CC_END
+  [37] regexp_cc_parts -> . regexp_cc_parts regexp_cc_part
+  [38] regexp_cc_parts -> . regexp_cc_part
+  [39] regexp_cc_part -> . CC_CHAR
+  [40] regexp_cc_part -> . CC_CHAR CC_RANGE CC_CHAR
+
+  CC_CHAR shift 59
+  regexp_cc_parts goto 62
+  regexp_cc_part goto 58
+
+State 58:
+  [38] regexp_cc_parts -> regexp_cc_part .
+
+  CC_CHAR reduce [38] regexp_cc_parts -> regexp_cc_part
+  CC_END reduce [38] regexp_cc_parts -> regexp_cc_part
+
+State 59:
+  [39] regexp_cc_part -> CC_CHAR .
+  [40] regexp_cc_part -> CC_CHAR . CC_RANGE CC_CHAR
+
+  CC_CHAR reduce [39] regexp_cc_part -> CC_CHAR
+  CC_END reduce [39] regexp_cc_part -> CC_CHAR
+  CC_RANGE shift 60
+
+State 60:
+  [40] regexp_cc_part -> CC_CHAR CC_RANGE . CC_CHAR
+
+  CC_CHAR shift 61
+
+State 61:
+  [40] regexp_cc_part -> CC_CHAR CC_RANGE CC_CHAR .
+
+  CC_CHAR reduce [40] regexp_cc_part -> CC_CHAR CC_RANGE CC_CHAR
+  CC_END reduce [40] regexp_cc_part -> CC_CHAR CC_RANGE CC_CHAR
+
+State 62:
+  [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts . CC_END
+  [37] regexp_cc_parts -> regexp_cc_parts . regexp_cc_part
+  [39] regexp_cc_part -> . CC_CHAR
+  [40] regexp_cc_part -> . CC_CHAR CC_RANGE CC_CHAR
+
+  CC_CHAR shift 59
+  CC_END shift 64
+  regexp_cc_part goto 63
+
+State 63:
+  [37] regexp_cc_parts -> regexp_cc_parts regexp_cc_part .
+
+  CC_CHAR reduce [37] regexp_cc_parts -> regexp_cc_parts regexp_cc_part
+  CC_END reduce [37] regexp_cc_parts -> regexp_cc_parts regexp_cc_part
+
+State 64:
+  [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END .
+
+  RX_ALTERNATE reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_ATOM reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_CHARCLASS reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_END reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_GRP_OPEN reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_PLUS reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_QUESTION reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_STAR reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+
+State 65:
+  [35] regexp_atom -> RX_GRP_OPEN . regexp_alt RX_GRP_END
+  [23] regexp_alt -> . regexp_alts RX_ALTERNATE regexp_concat
+  [24] regexp_alt -> . regexp_concat
+  [25] regexp_alts -> . regexp_alts RX_ALTERNATE regexp_concat
+  [26] regexp_alts -> . regexp_concat
+  [27] regexp_concat -> . regexp_concat regexp_multi
+  [28] regexp_concat -> . regexp_multi
+  [29] regexp_multi -> . regexp_atom
+  [30] regexp_multi -> . regexp_atom RX_STAR
+  [31] regexp_multi -> . regexp_atom RX_QUESTION
+  [32] regexp_multi -> . regexp_atom RX_PLUS
+  [33] regexp_atom -> . RX_ATOM
+  [34] regexp_atom -> . regexp_charclass
+  [35] regexp_atom -> . RX_GRP_OPEN regexp_alt RX_GRP_END
+  [36] regexp_charclass -> . RX_CHARCLASS regexp_cc_parts CC_END
+
+  RX_ATOM shift 77
+  RX_CHARCLASS shift 78
+  RX_GRP_OPEN shift 81
+  regexp_alt goto 66
+  regexp_alts goto 68
+  regexp_concat goto 84
+  regexp_multi goto 85
+  regexp_atom goto 72
+  regexp_charclass goto 76
+
+State 66:
+  [35] regexp_atom -> RX_GRP_OPEN regexp_alt . RX_GRP_END
+
+  RX_GRP_END shift 67
+
+State 67:
+  [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END .
+
+  RX_ALTERNATE reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_ATOM reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_CHARCLASS reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_END reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_GRP_OPEN reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_PLUS reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_QUESTION reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_STAR reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+
+State 68:
+  [23] regexp_alt -> regexp_alts . RX_ALTERNATE regexp_concat
+  [25] regexp_alts -> regexp_alts . RX_ALTERNATE regexp_concat
+
+  RX_ALTERNATE shift 69
+
+State 69:
+  [23] regexp_alt -> regexp_alts RX_ALTERNATE . regexp_concat
+  [25] regexp_alts -> regexp_alts RX_ALTERNATE . regexp_concat
+  [27] regexp_concat -> . regexp_concat regexp_multi
+  [28] regexp_concat -> . regexp_multi
+  [29] regexp_multi -> . regexp_atom
+  [30] regexp_multi -> . regexp_atom RX_STAR
+  [31] regexp_multi -> . regexp_atom RX_QUESTION
+  [32] regexp_multi -> . regexp_atom RX_PLUS
+  [33] regexp_atom -> . RX_ATOM
+  [34] regexp_atom -> . regexp_charclass
+  [35] regexp_atom -> . RX_GRP_OPEN regexp_alt RX_GRP_END
+  [36] regexp_charclass -> . RX_CHARCLASS regexp_cc_parts CC_END
+
+  RX_ATOM shift 77
+  RX_CHARCLASS shift 78
+  RX_GRP_OPEN shift 81
+  regexp_concat goto 70
+  regexp_multi goto 85
+  regexp_atom goto 72
+  regexp_charclass goto 76
+
+State 70:
+  [23] regexp_alt -> regexp_alts RX_ALTERNATE regexp_concat .
+  [25] regexp_alts -> regexp_alts RX_ALTERNATE regexp_concat .
+  [27] regexp_concat -> regexp_concat . regexp_multi
+  [29] regexp_multi -> . regexp_atom
+  [30] regexp_multi -> . regexp_atom RX_STAR
+  [31] regexp_multi -> . regexp_atom RX_QUESTION
+  [32] regexp_multi -> . regexp_atom RX_PLUS
+  [33] regexp_atom -> . RX_ATOM
+  [34] regexp_atom -> . regexp_charclass
+  [35] regexp_atom -> . RX_GRP_OPEN regexp_alt RX_GRP_END
+  [36] regexp_charclass -> . RX_CHARCLASS regexp_cc_parts CC_END
+
+  RX_ALTERNATE reduce [25] regexp_alts -> regexp_alts RX_ALTERNATE regexp_concat
+  RX_ATOM shift 77
+  RX_CHARCLASS shift 78
+  RX_GRP_END reduce [23] regexp_alt -> regexp_alts RX_ALTERNATE regexp_concat
+  RX_GRP_OPEN shift 81
+  regexp_multi goto 71
+  regexp_atom goto 72
+  regexp_charclass goto 76
+
+State 71:
+  [27] regexp_concat -> regexp_concat regexp_multi .
+
+  RX_ALTERNATE reduce [27] regexp_concat -> regexp_concat regexp_multi
+  RX_ATOM reduce [27] regexp_concat -> regexp_concat regexp_multi
+  RX_CHARCLASS reduce [27] regexp_concat -> regexp_concat regexp_multi
+  RX_GRP_END reduce [27] regexp_concat -> regexp_concat regexp_multi
+  RX_GRP_OPEN reduce [27] regexp_concat -> regexp_concat regexp_multi
+
+State 72:
+  [29] regexp_multi -> regexp_atom .
+  [30] regexp_multi -> regexp_atom . RX_STAR
+  [31] regexp_multi -> regexp_atom . RX_QUESTION
+  [32] regexp_multi -> regexp_atom . RX_PLUS
+
+  RX_ALTERNATE reduce [29] regexp_multi -> regexp_atom
+  RX_ATOM reduce [29] regexp_multi -> regexp_atom
+  RX_CHARCLASS reduce [29] regexp_multi -> regexp_atom
+  RX_GRP_END reduce [29] regexp_multi -> regexp_atom
+  RX_GRP_OPEN reduce [29] regexp_multi -> regexp_atom
+  RX_PLUS shift 73
+  RX_QUESTION shift 74
+  RX_STAR shift 75
+
+State 73:
+  [32] regexp_multi -> regexp_atom RX_PLUS .
+
+  RX_ALTERNATE reduce [32] regexp_multi -> regexp_atom RX_PLUS
+  RX_ATOM reduce [32] regexp_multi -> regexp_atom RX_PLUS
+  RX_CHARCLASS reduce [32] regexp_multi -> regexp_atom RX_PLUS
+  RX_GRP_END reduce [32] regexp_multi -> regexp_atom RX_PLUS
+  RX_GRP_OPEN reduce [32] regexp_multi -> regexp_atom RX_PLUS
+
+State 74:
+  [31] regexp_multi -> regexp_atom RX_QUESTION .
+
+  RX_ALTERNATE reduce [31] regexp_multi -> regexp_atom RX_QUESTION
+  RX_ATOM reduce [31] regexp_multi -> regexp_atom RX_QUESTION
+  RX_CHARCLASS reduce [31] regexp_multi -> regexp_atom RX_QUESTION
+  RX_GRP_END reduce [31] regexp_multi -> regexp_atom RX_QUESTION
+  RX_GRP_OPEN reduce [31] regexp_multi -> regexp_atom RX_QUESTION
+
+State 75:
+  [30] regexp_multi -> regexp_atom RX_STAR .
+
+  RX_ALTERNATE reduce [30] regexp_multi -> regexp_atom RX_STAR
+  RX_ATOM reduce [30] regexp_multi -> regexp_atom RX_STAR
+  RX_CHARCLASS reduce [30] regexp_multi -> regexp_atom RX_STAR
+  RX_GRP_END reduce [30] regexp_multi -> regexp_atom RX_STAR
+  RX_GRP_OPEN reduce [30] regexp_multi -> regexp_atom RX_STAR
+
+State 76:
+  [34] regexp_atom -> regexp_charclass .
+
+  RX_ALTERNATE reduce [34] regexp_atom -> regexp_charclass
+  RX_ATOM reduce [34] regexp_atom -> regexp_charclass
+  RX_CHARCLASS reduce [34] regexp_atom -> regexp_charclass
+  RX_GRP_END reduce [34] regexp_atom -> regexp_charclass
+  RX_GRP_OPEN reduce [34] regexp_atom -> regexp_charclass
+  RX_PLUS reduce [34] regexp_atom -> regexp_charclass
+  RX_QUESTION reduce [34] regexp_atom -> regexp_charclass
+  RX_STAR reduce [34] regexp_atom -> regexp_charclass
+
+State 77:
+  [33] regexp_atom -> RX_ATOM .
+
+  RX_ALTERNATE reduce [33] regexp_atom -> RX_ATOM
+  RX_ATOM reduce [33] regexp_atom -> RX_ATOM
+  RX_CHARCLASS reduce [33] regexp_atom -> RX_ATOM
+  RX_GRP_END reduce [33] regexp_atom -> RX_ATOM
+  RX_GRP_OPEN reduce [33] regexp_atom -> RX_ATOM
+  RX_PLUS reduce [33] regexp_atom -> RX_ATOM
+  RX_QUESTION reduce [33] regexp_atom -> RX_ATOM
+  RX_STAR reduce [33] regexp_atom -> RX_ATOM
+
+State 78:
+  [36] regexp_charclass -> RX_CHARCLASS . regexp_cc_parts CC_END
+  [37] regexp_cc_parts -> . regexp_cc_parts regexp_cc_part
+  [38] regexp_cc_parts -> . regexp_cc_part
+  [39] regexp_cc_part -> . CC_CHAR
+  [40] regexp_cc_part -> . CC_CHAR CC_RANGE CC_CHAR
+
+  CC_CHAR shift 59
+  regexp_cc_parts goto 79
+  regexp_cc_part goto 58
+
+State 79:
+  [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts . CC_END
+  [37] regexp_cc_parts -> regexp_cc_parts . regexp_cc_part
+  [39] regexp_cc_part -> . CC_CHAR
+  [40] regexp_cc_part -> . CC_CHAR CC_RANGE CC_CHAR
+
+  CC_CHAR shift 59
+  CC_END shift 80
+  regexp_cc_part goto 63
+
+State 80:
+  [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END .
+
+  RX_ALTERNATE reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_ATOM reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_CHARCLASS reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_GRP_END reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_GRP_OPEN reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_PLUS reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_QUESTION reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+  RX_STAR reduce [36] regexp_charclass -> RX_CHARCLASS regexp_cc_parts CC_END
+
+State 81:
+  [35] regexp_atom -> RX_GRP_OPEN . regexp_alt RX_GRP_END
+  [23] regexp_alt -> . regexp_alts RX_ALTERNATE regexp_concat
+  [24] regexp_alt -> . regexp_concat
+  [25] regexp_alts -> . regexp_alts RX_ALTERNATE regexp_concat
+  [26] regexp_alts -> . regexp_concat
+  [27] regexp_concat -> . regexp_concat regexp_multi
+  [28] regexp_concat -> . regexp_multi
+  [29] regexp_multi -> . regexp_atom
+  [30] regexp_multi -> . regexp_atom RX_STAR
+  [31] regexp_multi -> . regexp_atom RX_QUESTION
+  [32] regexp_multi -> . regexp_atom RX_PLUS
+  [33] regexp_atom -> . RX_ATOM
+  [34] regexp_atom -> . regexp_charclass
+  [35] regexp_atom -> . RX_GRP_OPEN regexp_alt RX_GRP_END
+  [36] regexp_charclass -> . RX_CHARCLASS regexp_cc_parts CC_END
+
+  RX_ATOM shift 77
+  RX_CHARCLASS shift 78
+  RX_GRP_OPEN shift 81
+  regexp_alt goto 82
+  regexp_alts goto 68
+  regexp_concat goto 84
+  regexp_multi goto 85
+  regexp_atom goto 72
+  regexp_charclass goto 76
+
+State 82:
+  [35] regexp_atom -> RX_GRP_OPEN regexp_alt . RX_GRP_END
+
+  RX_GRP_END shift 83
+
+State 83:
+  [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END .
+
+  RX_ALTERNATE reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_ATOM reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_CHARCLASS reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_GRP_END reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_GRP_OPEN reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_PLUS reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_QUESTION reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+  RX_STAR reduce [35] regexp_atom -> RX_GRP_OPEN regexp_alt RX_GRP_END
+
+State 84:
+  [24] regexp_alt -> regexp_concat .
+  [26] regexp_alts -> regexp_concat .
+  [27] regexp_concat -> regexp_concat . regexp_multi
+  [29] regexp_multi -> . regexp_atom
+  [30] regexp_multi -> . regexp_atom RX_STAR
+  [31] regexp_multi -> . regexp_atom RX_QUESTION
+  [32] regexp_multi -> . regexp_atom RX_PLUS
+  [33] regexp_atom -> . RX_ATOM
+  [34] regexp_atom -> . regexp_charclass
+  [35] regexp_atom -> . RX_GRP_OPEN regexp_alt RX_GRP_END
+  [36] regexp_charclass -> . RX_CHARCLASS regexp_cc_parts CC_END
+
+  RX_ALTERNATE reduce [26] regexp_alts -> regexp_concat
+  RX_ATOM shift 77
+  RX_CHARCLASS shift 78
+  RX_GRP_END reduce [24] regexp_alt -> regexp_concat
+  RX_GRP_OPEN shift 81
+  regexp_multi goto 71
+  regexp_atom goto 72
+  regexp_charclass goto 76
+
+State 85:
+  [28] regexp_concat -> regexp_multi .
+
+  RX_ALTERNATE reduce [28] regexp_concat -> regexp_multi
+  RX_ATOM reduce [28] regexp_concat -> regexp_multi
+  RX_CHARCLASS reduce [28] regexp_concat -> regexp_multi
+  RX_GRP_END reduce [28] regexp_concat -> regexp_multi
+  RX_GRP_OPEN reduce [28] regexp_concat -> regexp_multi
+
+State 86:
+  [28] regexp_concat -> regexp_multi .
+
+  RX_ALTERNATE reduce [28] regexp_concat -> regexp_multi
+  RX_ATOM reduce [28] regexp_concat -> regexp_multi
+  RX_CHARCLASS reduce [28] regexp_concat -> regexp_multi
+  RX_END reduce [28] regexp_concat -> regexp_multi
+  RX_GRP_OPEN reduce [28] regexp_concat -> regexp_multi
+
+State 87:
+  [24] regexp_alt -> regexp_concat .
+  [26] regexp_alts -> regexp_concat .
+  [27] regexp_concat -> regexp_concat . regexp_multi
+  [29] regexp_multi -> . regexp_atom
+  [30] regexp_multi -> . regexp_atom RX_STAR
+  [31] regexp_multi -> . regexp_atom RX_QUESTION
+  [32] regexp_multi -> . regexp_atom RX_PLUS
+  [33] regexp_atom -> . RX_ATOM
+  [34] regexp_atom -> . regexp_charclass
+  [35] regexp_atom -> . RX_GRP_OPEN regexp_alt RX_GRP_END
+  [36] regexp_charclass -> . RX_CHARCLASS regexp_cc_parts CC_END
+
+  RX_ALTERNATE reduce [26] regexp_alts -> regexp_concat
+  RX_ATOM shift 56
+  RX_CHARCLASS shift 57
+  RX_END reduce [24] regexp_alt -> regexp_concat
+  RX_GRP_OPEN shift 65
+  regexp_multi goto 50
+  regexp_atom goto 51
+  regexp_charclass goto 55
+
+State 88:
+  [17] lexer_rule -> TOKEN . regexp
+  [18] lexer_rule -> TOKEN . regexp ACTION TOKEN
+  [21] regexp -> . RX_START regexp_alt RX_END
+  [22] regexp -> . RX_START regexp_alt RX_END regexp_options
+
+  RX_START shift 40
+  regexp goto 89
+
+State 89:
+  [17] lexer_rule -> TOKEN regexp .
+  [18] lexer_rule -> TOKEN regexp . ACTION TOKEN
+
+  %eof reduce [17] lexer_rule -> TOKEN regexp
+  ACTION shift 90
+  DIRECTIVE reduce [17] lexer_rule -> TOKEN regexp
+  TOKEN reduce [17] lexer_rule -> TOKEN regexp
+
+State 90:
+  [18] lexer_rule -> TOKEN regexp ACTION . TOKEN
+
+  TOKEN shift 91
+
+State 91:
+  [18] lexer_rule -> TOKEN regexp ACTION TOKEN .
+
+  %eof reduce [18] lexer_rule -> TOKEN regexp ACTION TOKEN
+  DIRECTIVE reduce [18] lexer_rule -> TOKEN regexp ACTION TOKEN
+  TOKEN reduce [18] lexer_rule -> TOKEN regexp ACTION TOKEN
+
+State 92:
+  [4] line -> lexer_rule .
+
+  %eof reduce [4] line -> lexer_rule
+  DIRECTIVE reduce [4] line -> lexer_rule
+  TOKEN reduce [4] line -> lexer_rule
+
+State 93:
+  [2] file -> line .
+
+  %eof reduce [2] file -> line
+  DIRECTIVE reduce [2] file -> line
+  TOKEN reduce [2] file -> line
+
