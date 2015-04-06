@@ -8,5 +8,5 @@ Current version:  1.0.0-alpha1
 * `fpg` - the fox parser generator.  *[Not yet implemented - but soon!]*  This accepts a file describing a set of grammar rules that the parser will recognize as a complete file.  Each grammar rule can have a specific action associated with it, to build lists out of the input tokens and/or to call user-provided functions to process the tokens more thoroughly.
 
 ## Features
-* The entire set of tools is written in _(hopefully well-documented)_ python
+* The entire set of tools is written in _(hopefully well-documented)_ python as a fairly straightforward implementation of the algorithms presented by Aho, Sethi, and Ullman in the so-called "Dragon" book, _Compilers, principles, techniques, and tools_.
 * Common file format and common directives used for both `flg` and `fpg`
