@@ -19,6 +19,7 @@ C_ACTION /->/ -> push(expression)
 
 %mode comment
 
+%skip /\(:/ -> push(comment)
 %skip /:\)/ -> pop(comment)
 %skip /.|\n/
 
