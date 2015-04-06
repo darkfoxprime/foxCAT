@@ -1,8 +1,10 @@
 (:  these token and table definitions are common between flg and fpg.  :)
 
+%mode normal
+
 C_TOKEN /[A-Za-z_][A-Za-z0-9_]*/
 C_DIRECTIVE /%[a-z]+/
-C_EQUALS /=/ -> push(expression)
+C_EQUALS /=/
 C_NUMBER /[-+]?[0-9]+/
 C_POS_PARAM /\$[0-9]+/
 C_QUOTEDSTR /(("(\\.|[^\\"])*")|('(\\.|[^\\'])*'))+/
@@ -38,3 +40,5 @@ C_COMMA /,/
 
 %skip /[ \t]/
 %skip /\n/ -> pop(expression)
+
+%mode normal
