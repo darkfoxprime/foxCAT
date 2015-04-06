@@ -201,9 +201,6 @@ class flgParserDriver(flgParser):
       alt[1].transition(None, s2)
     return (s1,s2)
 
-  def rxMakeGroupNFA(self, NFA):
-    return NFA
-
   def rxMakePlusNFA(self, NFA):
     s1 = State()
     s2 = State()
