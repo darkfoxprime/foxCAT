@@ -1,6 +1,7 @@
-# these are the common grammar productions for "expressions" between fpg and flg.
-# flg only wants a couple types of these - an expression list, or a single token,
-# but fpg will need the entire gamut in order to allow flexible action definitions.
+(:  these are the common grammar productions for "expressions"
+    between fpg and flg.  flg only wants a couple types of these -
+    an expression list, or a single token, but fpg will need the
+    entire gamut in order to allow flexible action definitions.  :)
 
 expression                  <-  exp_factor
                             ->  $1

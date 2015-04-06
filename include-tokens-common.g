@@ -1,5 +1,7 @@
-(:  these are the tokens used by both the flg lexer generator and fpg parser generator.
-    if these are rearranged, both flg and fpg must be rebuilt.  :)
+(:  these are the tokens used by both the flg lexer generator and
+    fpg parser generator.  if these are rearranged, both flg and fpg
+    must be rebuilt.  :)
+
 %tokens (
   C_TOKEN,
   C_DIRECTIVE,

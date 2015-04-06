@@ -1,5 +1,6 @@
 (:  these are the tokens defined by the flg lexer generator.
     these can be rearranged at will without affecting fpg.  :)
+
 %tokens (
   L_RX_START,
   L_RX_END,
