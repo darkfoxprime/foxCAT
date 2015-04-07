@@ -14,6 +14,10 @@ class flgLexerDriver(flgLexer):
 
 class flgParserDriver(flgParser):
 
+  def rule_text(self, rulenum):
+    rule = self.rules[rulenum]
+    return "[%d] %s <- %s" % (rulenum, self.nonterms[rule[0]], " ".join([(((sym > 0) and self.nonterms[sym]) or self.tokens[-sym]) for sym in rule[1]]))
+
   def debug(self, rule, states, values, lookahead, action):
     #print >> sys.stderr, "Reducing rule %s\n> states=%s values=%s lookahead=%s action=%s" % (self.rule_text(rule), "[" + ", ".join(map(str, states)) + "]", str(values), str(lookahead), str(action))
     pass
@@ -27,17 +31,6 @@ class flgParserDriver(flgParser):
       'start': None,
       'tables': {},
     }
-
-  def short_repr(foo):
-    if isinstance(foo,dict):
-      return '{' + ",".join(["%s:%s" % (short_repr(k),short_repr(v)) for (k,v) in foo.items()]) + '}'
-    elif isinstance(foo,tuple):
-      return '(' + ",".join([short_repr(v) for (v) in foo]) + (((len(foo)==1) and ',)') or ')')
-    elif isinstance(foo,list):
-      return '[' + ",".join([short_repr(v) for (v) in foo]) + ']'
-    else:
-      return repr(foo)
-
 
   def finalizeParser(self, values):
     tables = self.data['tables']
@@ -73,10 +66,6 @@ class flgParserDriver(flgParser):
     tables['%tokenmap'] = self.data['tokens']
 
     return tables
-
-  def rule_text(self, rulenum):
-    rule = self.rules[rulenum]
-    return "[%d] %s <- %s" % (rulenum, self.nonterms[rule[0]], " ".join([(((sym > 0) and self.nonterms[sym]) or self.tokens[-sym]) for sym in rule[1]]))
 
   # convert an atom in an expression into the list value for that expression
   # 'value' will always be a unicode string coming in
@@ -255,23 +244,13 @@ class flgParserDriver(flgParser):
 
 if __name__ == '__main__':
   from flgLexer import flgLexer
-  l = flgLexer()
+  l = flgLexerDriver()
   p = flgParserDriver()
   result = p.parse(l)
 
-  def short_repr(foo):
-    if isinstance(foo,dict):
-      return '{' + ",".join(["%s:%s" % (short_repr(k),short_repr(v)) for (k,v) in foo.items()]) + '}'
-    elif isinstance(foo,tuple):
-      return '(' + ",".join([short_repr(v) for (v) in foo]) + (((len(foo)==1) and ',)') or ')')
-    elif isinstance(foo,list):
-      return '[' + ",".join([short_repr(v) for (v) in foo]) + ']'
-    else:
-      return repr(foo)
-
   print "  tables={"
   for (key,val) in result.items():
-    print "    %s:%s," % (short_repr(key),short_repr(val))
+    print "    %s:%s," % (repr(key),repr(val))
   print "  }"
 
 
