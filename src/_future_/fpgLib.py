@@ -42,7 +42,7 @@ regexp_multi <- regexp_atom L_RX_QUESTION -> ('(','rxMakeQuestionNFA',(')','$1')
 regexp_multi <- regexp_atom L_RX_PLUS -> ('(','rxMakePlusNFA',(')','$1'))
 regexp_atom <- L_RX_ATOM -> ('(','rxMakeAtomNFA',(')','$1'))
 regexp_atom <- regexp_charclass
-regexp_atom <- L_RX_GRP_OPEN regexp_alt L_RX_GRP_CLOSE -> ('(','rxMakeGroupNFA',(')','$2'))
+regexp_atom <- L_RX_GRP_OPEN regexp_alt L_RX_GRP_CLOSE -> '$2'
 regexp_charclass <- L_RX_CHARCLASS regexp_cc_parts L_RX_CC_END -> ('(','rxMakeCharClassNFA',(')','$1','$2'))
 regexp_cc_parts <- regexp_cc_part -> (')','$1')
 regexp_cc_parts <- regexp_cc_parts regexp_cc_part -> ('+','$1',(')','$2'))
