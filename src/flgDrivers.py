@@ -41,11 +41,37 @@ class flgParserDriver(flgParser):
 
   def finalizeParser(self, values):
     tables = self.data['tables']
+
+    # convert each lexer NFA to a DFA, then to a state table
     for lextbl in tables.keys():
       tables[lextbl] = tables[lextbl].toDFA().toTable()
+
+    # add any undefined tokens to the end of the tokens list
+    # then replace all tokens with their token number
+    maxtoken = max(self.data['tokens'].values())
+    for lextbl in tables.keys():
+      for statenum in range(len(tables[lextbl])):
+        state = tables[lextbl][statenum]
+        if state[0] is not None:
+          token = state[0]
+          if isinstance(token, tuple):
+            token = token[0]
+          if token[0] != '%':
+            if token not in self.data['tokens']:
+              maxtoken += 1
+              self.data['tokens'][token] = maxtoken
+              print >> sys.stderr, "Warning: setting token %s to token value %d." % (token, maxtoken)
+            if isinstance(state[0], tuple):
+              new_accept = (self.data['tokens'][token],) + state[0][1:]
+            else:
+              new_accept = self.data['tokens'][token]
+            tables[lextbl][statenum] = (new_accept,) + state[1:]
+
+    # set the lexer table meta-data
     tables['%initial'] = self.data['start']
     tables['%tokens'] = [token for (tnum,token) in sorted([(tnum,token) for (token,tnum) in self.data['tokens'].items()])]
     tables['%tokenmap'] = self.data['tokens']
+
     return tables
 
   def rule_text(self, rulenum):
@@ -108,7 +134,7 @@ class flgParserDriver(flgParser):
     sm = self.data['tables'][self.data['mode']]
     s1 = State()
     s2 = State()
-    s2.accepts = self.data['tokens'].get(token, token)
+    s2.accepts = token
     if action != None and not isinstance(action, basestring):
       action = tuple(action)
     s2.nexttable = action
