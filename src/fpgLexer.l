@@ -7,7 +7,7 @@
     the lexer and parser files.  :)
 
 %include "include-tokens-common.g"
-%include "include-tokens-flg.g"
+%include "include-tokens-fpg.g"
 
 %start normal
 
