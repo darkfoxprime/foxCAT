@@ -13,32 +13,30 @@ class foxLanguagesPython(foxLanguagesBase):
   language = u'python'
 
   @classmethod
-  def short_repr(self, foo):
+  def short_repr(self, foo, splitDepth=0):
+    nextDepth = (splitDepth > 0) and (splitDepth-1) or 0
     if isinstance(foo,dict):
-      items = ["%s:%s" % (self.short_repr(k),self.short_repr(v)) for (k,v) in foo.items()]
-      maxlen = reduce(max, [len(x) for x in items], 0)
-      if maxlen < 132:
-        rpr = '{' + ",".join(items) + '}'
-      else:
+      items = ["%s:%s" % (self.short_repr(k),self.short_repr(v,splitDepth=nextDepth)) for (k,v) in foo.items()]
+      if splitDepth > 0:
         rpr = '{\n' + ",\n".join(items) + '\n}'
+      else:
+        rpr = '{' + ",".join(items) + '}'
       return rpr
     elif isinstance(foo,tuple):
-      items = [self.short_repr(v) for v in foo]
-      maxlen = reduce(max, [len(x) for x in items], 0)
+      items = [self.short_repr(v,splitDepth=nextDepth) for v in foo]
       if len(items) == 1:
         items[0] += ','
-      #if maxlen < 132:
-      rpr = '(' + ",".join(items) + ')'
-      #else:
-      #  rpr = '(\n' + ",\n".join(items) + '\n)'
+      if splitDepth > 0:
+        rpr = '(\n' + ",\n".join(items) + '\n)'
+      else:
+        rpr = '(' + ",".join(items) + ')'
       return rpr
     elif isinstance(foo,list):
-      items = [self.short_repr(v) for v in foo]
-      maxlen = reduce(max, [len(x) for x in items], 0)
-      if maxlen < 132:
-        rpr = '[' + ",".join(items) + ']'
-      else:
+      items = [self.short_repr(v,splitDepth=nextDepth) for v in foo]
+      if splitDepth > 0:
         rpr = '[\n' + ",\n".join(items) + '\n]'
+      else:
+        rpr = '[' + ",".join(items) + ']'
       return rpr
     else:
       return repr(foo)
@@ -46,6 +44,8 @@ class foxLanguagesPython(foxLanguagesBase):
   @classmethod
   def convert(self, name, value):
     """Convert a variable to a string representation suitable for the python language.  The name is provided so that the conversion can be context-specific."""
+    if name == 'flg_tables':
+      return self.short_repr(value, splitDepth=2)
     return self.short_repr(value)
 
   lexerOutput = u'''#!%!pythonexec%
