@@ -30,8 +30,11 @@ line                        <-  directive
 %include "include-grammar-directives.g"
 %include "include-grammar-expressions.g"
 
-(:  the production rules are fairly simple.  most of the work happens in
-    the fpgAddToGrammar function call in the production rule's action.  :)
+(:  the production rules are fairly simple.  most of the work in building
+    the grammar happens in the fpgAddToGrammar function call in the
+    production rule's action, and then the real work happens in the
+    finalizeParser method to convert the grammar to a set of LR(1) parser
+    tables.  :)
 
 production                  <-  C_TOKEN C_DERIVES productionAlternatives P_END_PRODUCTION
                             ->  fpgAddToGrammar($1,$2)
