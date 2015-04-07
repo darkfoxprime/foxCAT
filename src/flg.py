@@ -142,6 +142,23 @@ else:
   except IOError,e:
     optparser.error('Unable to open %s for reading: %s' % (infilename, e.strerror))
 
+########################################################################
+##
+##  parse the input file and generate the lexer tables
+##
+########################################################################
+
+lexer = flgLexerDriver(source=infile, filename=infilename)
+parser = flgParserDriver()
+
+lexer_tables = parser.parse(lexer)
+
+########################################################################
+##
+##  generate the output file
+##
+########################################################################
+
 if options.outputfile == '-':
   outputfile = sys.stdout
 else:
@@ -153,17 +170,6 @@ else:
     outputfile = open(options.outputfile, 'w')
   except IOError,e:
     optparser.error('Unable to open %s for writing: %s' % (options.outputfile, e.strerror))
-
-########################################################################
-##
-##  parse the input file and generate the lexer tables
-##
-########################################################################
-
-lexer = flgLexerDriver(source=infile, filename=infilename)
-parser = flgParserDriver()
-
-lexer_tables = parser.parse(lexer)
 
 vars = {
   'VERSION': VERSION,
