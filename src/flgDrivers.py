@@ -4,12 +4,19 @@ from flgLexer import *
 from flgParser import *
 from flgLib import *
 
+DEBUGGING_PARSER = False
+DEBUGGING_LEXER = False
+
 class flgLexerDriver(flgLexer):
   def processToken(self, token, table, nexttable):
     return token
 
-  def debug(self, token, table, nexttable):
-    pass
+  if DEBUGGING_LEXER:
+    def debug(self, token, table, nexttable):
+      print >> sys.stderr, "%s:%s.%s = %s(%s)" % (token.location[u'file'], token.location[u'line'], token.location[u'char'], token.token, token.value)
+  else:
+    def debug(self, token, table, nexttable):
+      pass
 
 
 class flgParserDriver(flgParser):
@@ -18,9 +25,27 @@ class flgParserDriver(flgParser):
     rule = self.rules[rulenum]
     return "[%d] %s <- %s" % (rulenum, self.nonterms[rule[0]], " ".join([(((sym > 0) and self.nonterms[sym]) or self.tokens[-sym]) for sym in rule[1]]))
 
-  def debug(self, rule, states, values, lookahead, action):
-    #print >> sys.stderr, "Reducing rule %s\n> states=%s values=%s lookahead=%s action=%s" % (self.rule_text(rule), "[" + ", ".join(map(str, states)) + "]", str(values), str(lookahead), str(action))
-    pass
+  if DEBUGGING_PARSER:
+    def debug(self, rule, states, values, lookahead, action):
+      print >> sys.stderr, "Reducing rule %s\n> states=%s values=%s lookahead=%s action=%s" % (self.rule_text(rule), "[" + ", ".join(map(str, states)) + "]", str(values), str(lookahead), str(action))
+  else:
+    def debug(self, rule, states, values, lookahead, action):
+      pass
+
+  if DEBUGGING_PARSER:
+    __eval_action_indent = 0
+    def _eval_action(self, action, rulevars):
+      self.__eval_action_indent += 1
+      __call = "_eval_action" + repr( (action,rulevars) )
+      print >> sys.stderr, "%s%s" % (">" * self.__eval_action_indent, __call)
+      try:
+        __ret = super(fpgParserDriver,self)._eval_action(action, rulevars)
+      except Exception,e:
+        print >> sys.stderr, "%s%s -> %s" % ("*" * self.__eval_action_indent, __call, e)
+        raise
+      print >> sys.stderr, "%s%s -> %s" % ("<" * self.__eval_action_indent, __call, repr(__ret))
+      self.__eval_action_indent -= 1
+      return __ret
 
   MAX_UNICODE_VALUE = 0x10FFFF
 
@@ -93,6 +118,8 @@ class flgParserDriver(flgParser):
     return newval
 
   def processDirective(self, directive, value):
+    if DEBUGGING_PARSER:
+      print >> sys.stderr, "processDirective%s" % (repr((directive,value)),)
     if directive == u'%include':
       ifile = open(value[1:], 'rb')
       self.lexer.new_source(ifile, value[1:])
