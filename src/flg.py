@@ -40,7 +40,9 @@ from foxLanguages import *
 ##
 ########################################################################
 
-optparser = optparse.OptionParser( version = "%prog version " + VERSION_STR )
+PROG = u'flg'
+
+optparser = optparse.OptionParser( prog = PROG, version = "%prog version " + VERSION_STR )
 
 optparser.set_description('''The FOX Lexer Generator.  Given suitable flg source file, this generates lexer code capable of recognizing and tokenizing an input stream into the tokens defined by the flg source file.''')
 
@@ -180,4 +182,4 @@ vars = {
   'pythonexec': sys.executable,
 }
 
-langClass.writeFile(outputfile, langClass.lexerOutput, vars)
+langClass.writeFile(outputfile, langClass.templates[PROG], vars)
