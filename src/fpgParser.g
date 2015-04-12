@@ -37,7 +37,7 @@ line                        <-  directive
     tables.  :)
 
 production                  <-  C_TOKEN C_DERIVES productionAlternatives P_END_PRODUCTION
-                            ->  fpgAddToGrammar($1,$2)
+                            ->  fpgAddToGrammar($1,$3)
                             ;
 
 productionAlternatives      <-  productionRule
