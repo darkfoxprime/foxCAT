@@ -3,22 +3,49 @@
 import sys
 
 grammar_source = u"""
-B <- begin L end
-L <- S
-L <- S semicolon L
-S <- I
-S <- E
-I <- if E then B
-I <- if E then B else B
-E <- id
+file <- line 
+file <- file line 
+line <- directive 
+line <- production 
+directive <- C_DIRECTIVE expression -> (u'(',u'processDirective',[(u'$',1),(u'$',2)])
+expression <- exp_plusminus -> (u'$',1)
+expression <- C_TOKEN C_EQUALS exp_plusminus -> (u'(', u'exprOper', [ (u'$',2), (u'$',1), (u'$',3)])
+exp_plusminus <- exp_timesdivide -> (u'$',1)
+exp_plusminus <- exp_plusminus C_PLUS exp_timesdivide -> (u'(', u'exprOper', [(u'$',2), (u'$',1), (u'$',3)])
+exp_plusminus <- exp_plusminus C_MINUS exp_timesdivide -> (u'(', u'exprOper', [(u'$',2), (u'$',1), (u'$',3)])
+exp_timesdivide <- exp_term -> (u'$',1)
+exp_timesdivide <- exp_timesdivide C_TIMES exp_term -> (u'(', u'exprOper', [(u'$',2), (u'$',1), (u'$',3)])
+exp_timesdivide <- exp_timesdivide C_DIVIDE exp_term -> (u'(', u'exprOper', [(u'$',2), (u'$',1), (u'$',3)])
+exp_timesdivide <- exp_timesdivide C_MODULO exp_term -> (u'(', u'exprOper', [(u'$',2), (u'$',1), (u'$',3)])
+exp_term <- C_TOKEN -> (u'(',u'exprToken',[(u'$',1)])
+exp_term <- C_QUOTEDSTR -> (u'(',u'exprString',[(u'$',1)])
+exp_term <- C_NUMBER -> (u'(',u'exprNumber',[(u'$',1)])
+exp_term <- C_POS_PARAM -> (u'(',u'exprPosParam',[(u'$',1)])
+exp_term <- C_PAREN_OPEN C_PAREN_CLOSE -> (u'(', u'exprList', [])
+exp_term <- C_PAREN_OPEN expression_list_with_comma C_PAREN_CLOSE -> (u'$',2)
+exp_term <- C_TOKEN C_PAREN_OPEN C_PAREN_CLOSE -> (u'(',u'exprFuncCall', [ (u'(',u'exprToken',[(u'$',1)]), (u'(', u'exprList', [])])
+exp_term <- C_TOKEN C_PAREN_OPEN expression_list_with_comma C_PAREN_CLOSE -> (u'(',u'exprFuncCall', [ (u'(',u'exprToken',[(u'$',1)]), (u'$', 3)])
+expression_list_with_comma <- expression_list -> (u'$',1)
+expression_list_with_comma <- expression_list C_COMMA -> (u'$',1)
+expression_list <- expression -> (u'(', u'exprList', [(u'$',1)])
+expression_list <- expression_list C_COMMA expression -> (u'+',(u'$',1),(u'(',u'exprList',[(u'$',3)]))
+production <- C_TOKEN C_DERIVES productionAlternatives P_END_PRODUCTION -> (u'(',u'fpgAddToGrammar',[(u'$',1),(u'$',3)])
+productionAlternatives <- productionRule -> [(u'$',1)]
+productionAlternatives <- productionAlternatives P_ALTERNATE productionRule -> (u'+',(u'$',1),[(u'$',3)])
+productionRule <- productionList -> [(u'$',1)]
+productionRule <- productionList C_ACTION expression -> [(u'$',1),(u'$',3)]
+productionList <- C_TOKEN -> [(u'$',1)]
+productionList <- productionList C_TOKEN -> (u'+',(u'$',1),[(u'$',2)])
 """
 
-grammar_rules = [(nonterm, tuple(rule.split(' ')), (((action and [eval(action)]) or [None])[0])) for (nonterm, rule, action) in [(nonterm,)+tuple((rule + ' -> ').split(' -> '))[0:2] for (nonterm,rule) in [tuple(rule.split(' <- ')) for rule in grammar_source.split('\n') if len(rule)]]]
-grammar_rules = [('%start', (grammar_rules[0][0],), '',)] + grammar_rules
+grammar_rules = [(nonterm, tuple([sym for sym in rule.split(u' ') if len(sym)]), (((action and [eval(action)]) or [None])[0])) for (nonterm, rule, action) in [(nonterm,)+tuple((rule + u' -> ').split(u' -> '))[0:2] for (nonterm,rule) in [tuple(rule.split(u' <- ')) for rule in grammar_source.split(u'\n') if len(rule)]]]
+
+grammar_rules = [(u'%start', (grammar_rules[0][0],), None,)] + grammar_rules
 
 nonterms = [rule[0] for rule in grammar_rules]
 nonterms = reduce(lambda a,b:(((b not in a) and (a+(b,))) or (a)), nonterms, ())
-tokens = (u'begin', u'end', u'semicolon', u'if', u'then', u'else', u'id')
+
+tokens = ( u'C_TOKEN', u'C_DIRECTIVE', u'C_EQUALS', u'C_NUMBER', u'C_POS_PARAM', u'C_QUOTEDSTR', u'C_PAREN_OPEN', u'C_PAREN_CLOSE', u'C_COMMA', u'C_PLUS', u'C_MINUS', u'C_TIMES', u'C_DIVIDE', u'C_MODULO', u'C_DERIVES', u'C_ACTION', u'P_ALTERNATE', u'P_END_PRODUCTION',)
 all_syms = reduce(lambda a,b:a+b, [rule[1] for rule in grammar_rules])
 all_syms = reduce(lambda a,b:(((b not in a) and (a+(b,))) or (a)), all_syms, ())
 all_syms = tuple(sorted(all_syms, reverse=True))
@@ -28,7 +55,9 @@ unused_syms = [sym for sym in all_syms if sym not in tokens+nonterms]
 #print >> sys.stderr, "unused_syms  =" + repr(unused_syms  )
 
 # use up token#0 as the special %eof token
-tokens = ('%eof',) + tokens
+tokens = (u'%eof',) + tokens
+
+print >> sys.stderr, "tokens=" + repr(tokens)
 
 symmap = [(nonterms[i],i) for i in xrange(len(nonterms))] + [(tokens[i],-i) for i in xrange(len(tokens))]
 symmap = symmap + [(y,x) for (x,y) in symmap]
@@ -127,7 +156,7 @@ def closure(k):
 def gen_parser_states( kernel ):
   state = len(states)
   state_map[kernel] = state
-  states.append({'kernel':kernel})
+  states.append({u'kernel':kernel})
 
   c = closure(kernel)
   #print >> sys.stderr, "Generating parser state %d for closure:\n%s" % (state, "\n".join(map(grammar_rule_display, c)))
@@ -144,7 +173,7 @@ def gen_parser_states( kernel ):
 
   # generate actions
   actions = {}
-  states[state]['actions'] = actions
+  states[state][u'actions'] = actions
   # one reduce action for each lookeahead symbol in kernel item where dot is at the end...
   for (rule,pos,lookahead) in kernel:
     grule = grammar_rules[rule]
@@ -167,54 +196,38 @@ def gen_parser_states( kernel ):
   return state
 
 # generate the parser tables by starting with the initial state: rule 0 (%start <- [nonterm]) at position 0 with lookahead of %eof
-init_state = gen_parser_states( ((0,0,(symmap['%eof'],)),) )
+init_state = gen_parser_states( ((0,0,(symmap[u'%eof'],)),) )
 
 if len(sys.argv) == 1:
-  sys.argv.append('tables')
+  sys.argv.append(u'tables')
 
-for arg in sys.argv[1:]:
-  if arg[0:2] == '--':
+for arg in map(unicode,sys.argv[1:]):
+  if arg[0:2] == u'--':
     arg = arg[2:]
-  if arg.startswith('table'):
-
-# dump the parser tables
-# we include:
-#   actionmap = map of (state,symbol) -> action
-#   action is an integer as follows:
-#       0 - accept and halt, we're done
-#      >0 - a state to shift to
-#      <0 - a negative rule number to reduce  (e.g. -5 means reduce rule [5])
-#   actionmap[None] points to the initial state.
-# for debugging, we also include:
-#   tokens = the list of tokens represented by negative numbers in the rules list
-#   nonterms = the list of nonterms represented by non-negative numbers in the rules list
-#   rules = the list of rules, where each rule of the form "nonterm <- alpha beta gamma... -> action" is represented by (nonterm,(alpha,beta,gamma,...),(action...)) where nonterm,alpha,etc. are the numeric representations of the nonterms and tokens, and (action...) is the parse tree representation of the action expression.
+  if arg.startswith(u'table'):
 
     actions = {}
 
     for i in xrange(len(states)):
       state = states[i]
-      for (sym,action) in state['actions'].items():
+      for (sym,action) in state[u'actions'].items():
         actions[i,sym] = action[0]
 
     actions[None] = init_state
 
-    def short_repr(foo):
-      if isinstance(foo,dict):
-        return '{' + ",".join(["%s:%s" % (short_repr(k),short_repr(v)) for (k,v) in foo.items()]) + '}'
-      elif isinstance(foo,tuple):
-        return '(' + ",".join([short_repr(v) for (v) in foo]) + (((len(foo)==1) and ',)') or ')')
-      elif isinstance(foo,list):
-        return '[' + ",".join([short_repr(v) for (v) in foo]) + ']'
-      else:
-        return repr(foo)
+    vars = {
+      'pythonexec': sys.executable,
+      'VERSION': (0,),
+      'VERSION_STR': '0',
+      'name': 'fpgParser',
+      'debug': True,
+      'fpg_tables':{'actions':actions,'tokens':tokens,'nonterms':nonterms,'rules':grammar_rules}
+    }
 
-    print "  actions=" + short_repr(actions)
-    print "  tokens=" + short_repr(tokens)
-    print "  nonterms=" + short_repr(nonterms)
-    print "  rules=" + short_repr(grammar_rules)
+    from foxLanguagesPython import foxLanguagesPython
+    foxLanguagesPython.writeFile(sys.stdout, foxLanguagesPython.templates[u'fpg'], vars)
 
-  elif arg.startswith('sed'):
+  elif arg.startswith(u'sed'):
     for i in range(1,len(tokens)):
       print "s/'%s'/%d/g" % (tokens[i],i)
 
@@ -226,7 +239,7 @@ for arg in sys.argv[1:]:
       c = closure(state['kernel'])
       print "State %d:" % (i,)
       for item in c:
-        print "  %s" % (grammar_rule_display( item ),)
+        print "  %s" % (grammar_rule_display( (item[0],item[1]) ),)
       print ""
       conflicts = []
       for (sym,action) in sorted(state['actions'].items()):
@@ -234,7 +247,7 @@ for arg in sys.argv[1:]:
           conflicts.append("/".join(map(lambda s:(((s<0) and "reduce") or "shift"), action)))
         action = action[0]
         if action < 0:
-          action = "reduce [%d]" % (-action,)
+          action = "reduce %s" % (grammar_rule_display(-action),)
         elif action == 0:
           action = "accept"
         elif sym < 0:
