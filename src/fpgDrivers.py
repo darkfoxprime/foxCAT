@@ -2,8 +2,9 @@
 import sys
 from fpgLexer import *
 from fpgParser import *
+from commonLib import *
 
-DEBUGGING_PARSER = True
+DEBUGGING_PARSER = False
 DEBUGGING_LEXER = False
 
 class fpgLexerDriver(fpgLexer):
@@ -18,7 +19,7 @@ class fpgLexerDriver(fpgLexer):
       pass
 
 
-class fpgParserDriver(fpgParser):
+class fpgParserDriver(fpgParser,commonLib):
 
   def _error_recovery(self, states, values, seen, lookahead):
     print >> sys.stderr, "*** Encountered parser error:"
@@ -53,133 +54,11 @@ class fpgParserDriver(fpgParser):
       self.__eval_action_indent -= 1
       return __ret
 
-  if DEBUGGING_PARSER:
-    __initialize_expr_tuples_indent = 0
-    def _initialize_expr_tuples(self, val):
-      self.__initialize_expr_tuples_indent += 1
-      __call = "_initialize_expr_tuples" + repr( (val,) )
-      print >> sys.stderr, "%s%s" % (">" * self.__initialize_expr_tuples_indent, __call)
-      try:
-        __ret = super(fpgParserDriver,self)._initialize_expr_tuples(val)
-      except Exception,e:
-        print >> sys.stderr, "%s%s -> %s" % ("*" * self.__initialize_expr_tuples_indent, __call, e)
-        raise
-      print >> sys.stderr, "%s%s -> %s" % ("<" * self.__initialize_expr_tuples_indent, __call, repr(__ret))
-      self.__initialize_expr_tuples_indent -= 1
-      return __ret
-
-  if DEBUGGING_PARSER:
-    __unmark_expr_tuples_indent = 0
-    def _unmark_expr_tuples(self, val):
-      self.__unmark_expr_tuples_indent += 1
-      __call = "_unmark_expr_tuples" + repr( (val,) )
-      print >> sys.stderr, "%s%s" % (">" * self.__unmark_expr_tuples_indent, __call)
-      try:
-        __ret = super(fpgParserDriver,self)._unmark_expr_tuples(val)
-      except Exception,e:
-        print >> sys.stderr, "%s%s -> %s" % ("*" * self.__unmark_expr_tuples_indent, __call, e)
-        raise
-      print >> sys.stderr, "%s%s -> %s" % ("<" * self.__unmark_expr_tuples_indent, __call, repr(__ret))
-      self.__unmark_expr_tuples_indent -= 1
-      return __ret
-
-  if DEBUGGING_PARSER:
-    __mark_expr_tuples_indent = 0
-    def _mark_expr_tuples(self, val):
-      self.__mark_expr_tuples_indent += 1
-      __call = "_mark_expr_tuples" + repr( (val,) )
-      print >> sys.stderr, "%s%s" % (">" * self.__mark_expr_tuples_indent, __call)
-      try:
-        __ret = super(fpgParserDriver,self)._mark_expr_tuples(val)
-      except Exception,e:
-        print >> sys.stderr, "%s%s -> %s" % ("*" * self.__mark_expr_tuples_indent, __call, e)
-        raise
-      print >> sys.stderr, "%s%s -> %s" % ("<" * self.__mark_expr_tuples_indent, __call, repr(__ret))
-      self.__mark_expr_tuples_indent -= 1
-      return __ret
+  # tells the commonLib.processDirectives method which directives are allowed.
+  allowed_directives = ( '%start', '%tokens', '%include' )
 
   ######################################################################
   # These are the functions invoked by the grammar actions
-
-  # exprXYZ() functions return ExprXYZ() objects invoked with the same
-  #   arguments.
-
-  def exprOper(self, *args):
-    __ret = tuple(args)
-    print >> sys.stderr, "exprOper%s -> %s" % (repr(args), repr(__ret))
-    return __ret
-
-  def exprList(self, *args):
-    __ret = list(args)
-    print >> sys.stderr, "exprList%s -> %s" % (repr(args), repr(__ret))
-    return __ret
-
-  def exprToken(self, *args):
-    __ret = args[0]
-    print >> sys.stderr, "exprToken%s -> %s" % (repr(args), repr(__ret))
-    return __ret
-
-  def exprString(self, *args):
-    s = ''
-    q = None
-    qs = args[0]
-    while len(qs) > 0:
-      c = qs[0]
-      qs = qs[1:]
-      if c == '\\':
-        s += qs[0]
-        qs = qs[1:]
-      elif c == q:
-        q = None
-      elif c in "\"'":
-        q = c
-      else:
-        s += c
-    __ret = s
-    print >> sys.stderr, "exprString%s -> %s" % (repr(args), repr(__ret))
-    return __ret
-
-  def exprNumber(self, *args):
-    __ret = int(args[0])
-    print >> sys.stderr, "exprNumber%s -> %s" % (repr(args), repr(__ret))
-    return __ret
-
-  def exprPosParam(self, *args):
-    __ret = (u'$', int(args[0][1:]))
-    print >> sys.stderr, "exprPosParam%s -> %s" % (repr(args), repr(__ret))
-    return __ret
-
-  def exprFuncCall(self, *args):
-    __ret = (u'(', args[0], list(args[1]))
-    print >> sys.stderr, "exprFuncCall%s -> %s" % (repr(args), repr(__ret))
-    return __ret
-
-  # this is the same as flgParserDriver.processDirective() with the
-  # exception of not implementing the "%mode" directive.
-  def processDirective(self, directive, value):
-    if DEBUGGING_PARSER:
-      print >> sys.stderr, "processDirective%s" % (repr((directive,value)),)
-    if directive == u'%include':
-      ifile = open(value, 'rb')
-      self.lexer.new_source(ifile, value)
-    elif directive == u'%tokens':
-      nexttoken = 1 + reduce(lambda maxvalue,(token,value):(((value > maxvalue) and value) or maxvalue), self.data['tokens'].items(), 0)
-      print >> sys.stderr, "%%tokens: nexttoken=%d" % (nexttoken,)
-      print >> sys.stderr, "%%tokens: value=%s" % (repr(value),)
-      for token in value:
-        if isinstance(token, (list,tuple)) and token[0] == '=':
-          nexttoken = token[2]
-          token = token[1]
-        if not isinstance(token,basestring):
-          raise ActionFailedException("Unknown expression value %s found in %s directive" % (repr(token), directive))
-        self.data['tokens'][token] = nexttoken
-        nexttoken += 1
-      print >> sys.stderr, "%%tokens: tokens=%s" % (repr(self.data['tokens']),)
-    elif directive == u'%start':
-      self.data['start'] = value
-    else:
-      raise ActionFailedException("Unknown directive %s %s" % (directive, repr(value)))
-    return directive
 
   # add a production (or set of productions) to the grammar
   # token is the nonterm of the production
@@ -195,7 +74,6 @@ class fpgParserDriver(fpgParser):
         action = production[1]
       else:
         action = None
-      print >> sys.stderr, "fpgAddToGrammar: new rule %s" % (repr( (nonterm, syms, action), ))
       self.data['grammar'].append( (nonterm, syms, action) )
       if self.data['start'] is None:
         self.data['start'] = nonterm
@@ -287,7 +165,10 @@ class fpgParserDriver(fpgParser):
     #
     grammar[0] = (u'%start', (self.data['start'],), None)
 
-    if DEBUGGING_PARSER: print >> sys.stderr, "initial grammar:"; import pprint; pprint.pprint(grammar, stream=sys.stderr)
+    if DEBUGGING_PARSER:
+      print >> sys.stderr, "initial grammar:"; import pprint; pprint.pprint(grammar, stream=sys.stderr)
+      print >> sys.stderr, "initial nonterms map ="; import pprint; pprint.pprint(nonterms, stream=sys.stderr)
+      print >> sys.stderr, "initial tokens map ="; import pprint; pprint.pprint(tokens, stream=sys.stderr)
 
     #
     # Next, we generate the nonterms mapping and list, and

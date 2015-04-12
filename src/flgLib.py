@@ -18,8 +18,12 @@ or more Transitions to other states."""
     self.__statenum = State.__statenum
 
   def __hash__(self):
-    hval = int(reduce(lambda a,b:a+hash(b), self.transitions, hash(self.accepts))) % 2**32
-    return hval
+    try:
+      hval = int(reduce(lambda a,b:a+hash(b), self.transitions, hash(self.accepts))) % 2**32
+      return hval
+    except TypeError,e:
+      print >> sys.stderr, "Failed to hash: accepts=%s nexttable=%s transitions=%s" % (repr(self.accepts), repr(self.nexttable), repr(self.transitions))
+      raise
 
   def __str__(self):
     acc = ""

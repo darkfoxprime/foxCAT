@@ -3,6 +3,7 @@ import sys
 from flgLexer import *
 from flgParser import *
 from flgLib import *
+from commonLib import *
 
 DEBUGGING_PARSER = False
 DEBUGGING_LEXER = False
@@ -19,7 +20,7 @@ class flgLexerDriver(flgLexer):
       pass
 
 
-class flgParserDriver(flgParser):
+class flgParserDriver(flgParser,commonLib):
 
   def rule_text(self, rulenum):
     rule = self.rules[rulenum]
@@ -46,6 +47,9 @@ class flgParserDriver(flgParser):
       print >> sys.stderr, "%s%s -> %s" % ("<" * self.__eval_action_indent, __call, repr(__ret))
       self.__eval_action_indent -= 1
       return __ret
+
+  # tells the commonLib.processDirectives method which directives are allowed.
+  allowed_directives = ( '%mode', '%start', '%tokens', '%include' )
 
   MAX_UNICODE_VALUE = 0x10FFFF
 
@@ -92,67 +96,17 @@ class flgParserDriver(flgParser):
 
     return tables
 
-  # convert an atom in an expression into the list value for that expression
-  # 'value' will always be a unicode string coming in
-  def convertValue(self, value):
-    if value[0] in u"'\"":
-      newval = '"'
-      q = None
-      esc = False
-      for c in value:
-        if esc:
-          newval += c
-          esc = False
-        elif c == q:
-          q = None
-        elif c in u"'\"":
-          q = c
-        elif c == '\\':
-          esc = True
-        else:
-          newval += c
-    elif value[0] in u"0123456789-+":
-      newval = int(value)
-    else:
-      newval = value
-    return newval
-
-  def processDirective(self, directive, value):
-    if DEBUGGING_PARSER:
-      print >> sys.stderr, "processDirective%s" % (repr((directive,value)),)
-    if directive == u'%include':
-      ifile = open(value[1:], 'rb')
-      self.lexer.new_source(ifile, value[1:])
-    elif directive == u'%tokens':
-      nexttoken = 1 + reduce(lambda maxvalue,(token,value):(((value > maxvalue) and value) or maxvalue), self.data['tokens'].items(), 0)
-      for token in value:
-        if isinstance(token, list):
-          if token[0] == '=':
-            nexttoken = token[2]
-            token = token[1]
-        if not isinstance(token,basestring):
-          raise ActionFailedException("Unknown expression value %s found in %s directive" % (repr(token), directive))
-        self.data['tokens'][token] = nexttoken
-        nexttoken += 1
-    elif directive == u'%mode':
-      self.data['mode'] = value
-      if self.data['start'] is None:
-        self.data['start'] = value
-      if value not in self.data['tables']:
-        self.data['tables'][value] = StateMachine()
-    elif directive == u'%start':
-      self.data['start'] = value
-    else:
-      raise ActionFailedException("Unknown directive %s %s" % (directive, repr(value)))
-    return directive
+  def _tuplify(self,val):
+    if isinstance(val, (list,tuple)):
+      return tuple([self._tuplify(item) for item in val])
+    return val
 
   def rxAddRuleToTable(self, token, NFA, action=None):
     sm = self.data['tables'][self.data['mode']]
     s1 = State()
     s2 = State()
     s2.accepts = token
-    if action != None and not isinstance(action, basestring):
-      action = tuple(action)
+    action = self._tuplify(action)
     s2.nexttable = action
     s1.transition(None, NFA[0])
     NFA[1].transition(None, s2)
@@ -194,7 +148,7 @@ class flgParserDriver(flgParser):
     s2 = State()
     for symrange in atom:
       s1.transition(symrange,s2)
-    return (s1,s2)
+    return [s1,s2]
 
   def rxMakeCharClassNFA(self, start, cc):
     negation = u'^' in start
@@ -226,14 +180,14 @@ class flgParserDriver(flgParser):
     s2 = State()
     for range in ranges:
       s1.transition(range,s2)
-    return (s1,s2)
+    return [s1,s2]
 
   def rxMakeSequenceNFA(self, *seq):
     s1 = seq[0][0]
     s2 = seq[-1][1]
     for i in range(1,len(seq)):
       seq[i-1][1].transition(None, seq[i][0])
-    return (s1,s2)
+    return [s1,s2]
 
   def rxMakeAlternateNFA(self, *seq):
     s1 = State()
@@ -241,7 +195,7 @@ class flgParserDriver(flgParser):
     for alt in seq:
       s1.transition(None, alt[0])
       alt[1].transition(None, s2)
-    return (s1,s2)
+    return [s1,s2]
 
   def rxMakePlusNFA(self, NFA):
     s1 = State()
@@ -249,7 +203,7 @@ class flgParserDriver(flgParser):
     s2.transition(None,s1)
     s1.transition(None,NFA[0])
     NFA[1].transition(None,s2)
-    return (s1,s2)
+    return [s1,s2]
 
   def rxMakeStarNFA(self, NFA):
     s1 = State()
@@ -258,7 +212,7 @@ class flgParserDriver(flgParser):
     s2.transition(None,s1)
     s1.transition(None,NFA[0])
     NFA[1].transition(None,s2)
-    return (s1,s2)
+    return [s1,s2]
 
   def rxMakeQuestionNFA(self, NFA):
     s1 = State()
@@ -266,7 +220,7 @@ class flgParserDriver(flgParser):
     s1.transition(None,s2)
     s1.transition(None,NFA[0])
     NFA[1].transition(None,s2)
-    return (s1,s2)
+    return [s1,s2]
 
 
 if __name__ == '__main__':

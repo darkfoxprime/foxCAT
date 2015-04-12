@@ -16,27 +16,36 @@ class foxLanguagesPython(foxLanguagesBase):
   def short_repr(self, foo, splitDepth=0):
     nextDepth = (splitDepth > 0) and (splitDepth-1) or 0
     if isinstance(foo,dict):
-      items = ["%s:%s" % (self.short_repr(k),self.short_repr(v,splitDepth=nextDepth)) for (k,v) in foo.items()]
       if splitDepth > 0:
-        rpr = '{\n' + ",\n".join(sorted(items)) + '\n}'
+        fmt = "\n%s:%s"
+        fin = ",\n"
       else:
-        rpr = '{' + ",".join(sorted(items)) + '}'
+        fmt = "%s:%s"
+        fin = ""
+      items = [fmt % (self.short_repr(k),self.short_repr(v,splitDepth=nextDepth)) for (k,v) in sorted(foo.items())]
+      rpr = "{%s%s}" % (",".join(items), fin)
       return rpr
     elif isinstance(foo,tuple):
-      items = [self.short_repr(v,splitDepth=nextDepth) for v in foo]
-      if len(items) == 1:
-        items[0] += ','
       if splitDepth > 0:
-        rpr = '(\n' + ",\n".join(items) + '\n)'
+        fmt = "\n%s"
+        fin = ",\n"
       else:
-        rpr = '(' + ",".join(items) + ')'
+        fmt = "%s"
+        fin = ""
+        if len(foo) == 1:
+          fin = ","
+      items = [fmt % (self.short_repr(v,splitDepth=nextDepth),) for v in foo]
+      rpr = "(%s%s)" % (",".join(items), fin)
       return rpr
     elif isinstance(foo,list):
-      items = [self.short_repr(v,splitDepth=nextDepth) for v in foo]
       if splitDepth > 0:
-        rpr = '[\n' + ",\n".join(items) + '\n]'
+        fmt = "\n%s"
+        fin = ",\n"
       else:
-        rpr = '[' + ",".join(items) + ']'
+        fmt = "%s"
+        fin = ""
+      items = [fmt % (self.short_repr(v,splitDepth=nextDepth),) for v in foo]
+      rpr = "[%s%s]" % (",".join(items), fin)
       return rpr
     else:
       return repr(foo)
@@ -477,13 +486,6 @@ try:
   ActionFailedException
 except NameError,e:
   class ActionFailedException(ParserFatalException): pass
-try:
-  FPGExpressionTuple
-except NameError,e:
-  class FPGExpressionTuple(tuple):
-    def __repr__(self):
-      return 'FPGXP' + super(FPGExpressionTuple,self).__repr__()
-  FPGXP = FPGExpressionTuple
 
 class %!name%(object):
 

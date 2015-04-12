@@ -55,7 +55,7 @@ line                        <-  directive
     with a transition from the first to the second on one specific
     character (for `rxMakeAtom`), or on a set of character ranges
     (for `rxMakeCharClass` and for rxMakeAtom on the `.` atom, which
-    is really the same as `[^\n]`).  The "value" of the `RX_ATOM`
+    is really the same as `[^\n]`).  The "value" of the `L_RX_ATOM`
     token or `regexp_charclass` production, then, is the tuple of
     `(s1,s2)` where `s1` is the first state of the two-state NFA and
     `s2` is the second state.  These two make up two of the three
@@ -112,62 +112,63 @@ line                        <-  directive
     from the same state on the same input.  The DFA state tables are
     then output as part of the generated lexer file.  :)
 
-lexer_rule                  <-  TOKEN regexp
-                            ->  rxAddToRecognizer($1, $2)
-                            |   TOKEN regexp ACTION expression
-                            ->  rxAddToRecognizer($1, $2, $4)
-                            |   DIRECTIVE regexp
-                            ->  rxAddToRecognizer($1, $2)
-                            |   DIRECTIVE regexp ACTION expression
-                            ->  rxAddToRecognizer($1, $2, $4)
+lexer_rule                  <-  C_TOKEN regexp
+                            ->  rxAddRuleToTable($1, $2)
+                            |   C_TOKEN regexp C_ACTION expression
+                            ->  rxAddRuleToTable($1, $2, $4)
+                            |   C_DIRECTIVE regexp
+                            ->  rxAddRuleToTable($1, $2)
+                            |   C_DIRECTIVE regexp C_ACTION expression
+                            ->  rxAddRuleToTable($1, $2, $4)
                             ;
 
-regexp                      <-  RX_START regexp_alt RX_END
+regexp                      <-  L_RX_START regexp_alt L_RX_END
                             ->  $2
                             ;
 
 regexp_alt                  <-  regexp_concat
                             ->  $1
-                            |   regexp_alt RX_ALTERNATE regexp_concat
-                            ->  rxMakeAlternate( $1, $3 )
+                            |   regexp_alt L_RX_ALTERNATE regexp_concat
+                            ->  rxMakeAlternateNFA( $1, $3 )
                             ;
 
 regexp_concat               <-  regexp_multi
                             ->  $1
-                            |   regexp_concats regexp_multi
-                            ->  rxMakeSequence( $1, $2 )
+                            |   regexp_concat regexp_multi
+                            ->  rxMakeSequenceNFA( $1, $2 )
                             ;
 
 regexp_multi                <-  regexp_atom
                             ->  $1
-                            |   regexp_atom RX_STAR
-                            ->  rxMakeStar($1)
-                            |   regexp_atom RX_QUESTION
-                            ->  rxMakeQuestion($1)
-                            |   regexp_atom RX_PLUS
-                            ->  rxMakePlus($1)
+                            |   regexp_atom L_RX_STAR
+                            ->  rxMakeStarNFA($1)
+                            |   regexp_atom L_RX_QUESTION
+                            ->  rxMakeQuestionNFA($1)
+                            |   regexp_atom L_RX_PLUS
+                            ->  rxMakePlusNFA($1)
                             ;
 
-regexp_atom                 <-  RX_ATOM
-                            ->  rxMakeAtom($1)
+regexp_atom                 <-  L_RX_ATOM
+                            ->  rxMakeAtomNFA($1)
                             |   regexp_charclass
                             ->  $1
-                            |   RX_GRP_OPEN regexp_alt RX_GRP_END
+                            |   L_RX_GRP_OPEN regexp_alt L_RX_GRP_CLOSE
                             ->  $2
                             ;
 
-regexp_charclass            <-  RX_CHARCLASS regexp_cc_parts CC_END
-                            ->  rxMakeCharClass($1,$2)
+regexp_charclass            <-  L_RX_CHARCLASS regexp_cc_parts L_RX_CC_END
+                            ->  rxMakeCharClassNFA($1,$2)
                             ;
 
 regexp_cc_parts             <-  regexp_cc_part
-                            ->  $1
+                            ->  ($1)
                             |   regexp_cc_parts regexp_cc_part
-                            ->  rxCCJoin($1,$2)
+                            ->  $1 + ($2)
                             ;
 
-regexp_cc_part              <-  CC_CHAR
-                            ->  rxCCCharRange($1,$1)
-                            |   CC_CHAR CC_RANGE CC_CHAR
-                            ->  rxCCCharRange($1,$3)
+regexp_cc_part              <-  L_RX_CC_CHAR
+                            ->  ($1,$1)
+                            |   L_RX_CC_CHAR L_RX_CC_RANGE L_RX_CC_CHAR
+                            ->  ($1,$3)
                             ;
+
