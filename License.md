@@ -1,4 +1,4 @@
-Copyright (c) 2015, Johnson Earls <>
+Copyright (c) 2015, Johnson Earls <johnson.earls@gmail.com>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
