@@ -296,7 +296,7 @@ class StateMachine(object):
             # immediately increment i.
             # make sure to use a _copy_ of the list of targets in the split
             # range, not just the list reference.
-            if symfirst > ranges[i][0]:
+            if symfirst > ranges[i][0][0]:
               ranges.insert(i+1, ( (symfirst, ranges[i][0][1]), ranges[i][1][:]))
               ranges[i] = ((ranges[i][0][0], symfirst-1), ranges[i][1])
               i += 1
